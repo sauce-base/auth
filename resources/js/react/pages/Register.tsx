@@ -31,7 +31,11 @@ export default function Register() {
         >
             <SocialiteProviders />
 
-            <form onSubmit={handleSubmit} className="space-y-3" data-testid="register-form">
+            <form
+                onSubmit={handleSubmit}
+                className="space-y-3"
+                data-testid="register-form"
+            >
                 <Field>
                     <Label htmlFor="name">{t('Name')}</Label>
                     <Input
@@ -44,7 +48,11 @@ export default function Register() {
                         value={data.name}
                         onChange={(e) => setData('name', e.target.value)}
                     />
-                    {errors.name && <FieldError data-testid="name-error">{errors.name}</FieldError>}
+                    {errors.name && (
+                        <FieldError data-testid="name-error">
+                            {errors.name}
+                        </FieldError>
+                    )}
                 </Field>
 
                 <Field>
@@ -59,7 +67,11 @@ export default function Register() {
                         value={data.email}
                         onChange={(e) => setData('email', e.target.value)}
                     />
-                    {errors.email && <FieldError data-testid="email-error">{errors.email}</FieldError>}
+                    {errors.email && (
+                        <FieldError data-testid="email-error">
+                            {errors.email}
+                        </FieldError>
+                    )}
                 </Field>
 
                 <Field>
@@ -74,22 +86,41 @@ export default function Register() {
                             required
                             data-testid="password"
                             value={data.password}
-                            onChange={(e) => setData('password', e.target.value)}
+                            onChange={(e) =>
+                                setData('password', e.target.value)
+                            }
                         />
                         <button
                             type="button"
                             data-testid="password-toggle"
-                            aria-label={showPassword ? t('Hide password') : t('Show password')}
+                            aria-label={
+                                showPassword
+                                    ? t('Hide password')
+                                    : t('Show password')
+                            }
                             onClick={() => setShowPassword((v) => !v)}
                             className="text-muted-foreground hover:text-foreground absolute top-1/2 right-3 -translate-y-1/2"
                         >
-                            {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                            {showPassword ? (
+                                <EyeOff className="size-4" />
+                            ) : (
+                                <Eye className="size-4" />
+                            )}
                         </button>
                     </div>
-                    {errors.password && <FieldError data-testid="password-error">{errors.password}</FieldError>}
+                    {errors.password && (
+                        <FieldError data-testid="password-error">
+                            {errors.password}
+                        </FieldError>
+                    )}
                 </Field>
 
-                <Button type="submit" className="mt-3 w-full" disabled={processing} data-testid="register-button">
+                <Button
+                    type="submit"
+                    className="mt-3 w-full"
+                    disabled={processing}
+                    data-testid="register-button"
+                >
                     {t('Register')}
                 </Button>
 

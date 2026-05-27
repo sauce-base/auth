@@ -30,8 +30,17 @@ export default function ResetPassword({ email, token }: Props) {
             title={t('Reset Password')}
             description={t('Enter your new password below')}
         >
-            <form onSubmit={handleSubmit} className="min-w-sm space-y-3" data-testid="reset-password-form">
-                <input type="hidden" name="token" value={token} data-testid="token" />
+            <form
+                onSubmit={handleSubmit}
+                className="min-w-sm space-y-3"
+                data-testid="reset-password-form"
+            >
+                <input
+                    type="hidden"
+                    name="token"
+                    value={token}
+                    data-testid="token"
+                />
 
                 <Field>
                     <Label htmlFor="email">{t('Email')}</Label>
@@ -43,7 +52,11 @@ export default function ResetPassword({ email, token }: Props) {
                         value={data.email}
                         readOnly
                     />
-                    {errors.email && <FieldError data-testid="email-error">{errors.email}</FieldError>}
+                    {errors.email && (
+                        <FieldError data-testid="email-error">
+                            {errors.email}
+                        </FieldError>
+                    )}
                 </Field>
 
                 <Field>
@@ -59,11 +72,17 @@ export default function ResetPassword({ email, token }: Props) {
                         value={data.password}
                         onChange={(e) => setData('password', e.target.value)}
                     />
-                    {errors.password && <FieldError data-testid="password-error">{errors.password}</FieldError>}
+                    {errors.password && (
+                        <FieldError data-testid="password-error">
+                            {errors.password}
+                        </FieldError>
+                    )}
                 </Field>
 
                 <Field>
-                    <Label htmlFor="password_confirmation">{t('Confirm Password')}</Label>
+                    <Label htmlFor="password_confirmation">
+                        {t('Confirm Password')}
+                    </Label>
                     <Input
                         id="password_confirmation"
                         name="password_confirmation"
@@ -73,12 +92,22 @@ export default function ResetPassword({ email, token }: Props) {
                         required
                         data-testid="password_confirmation"
                         value={data.password_confirmation}
-                        onChange={(e) => setData('password_confirmation', e.target.value)}
+                        onChange={(e) =>
+                            setData('password_confirmation', e.target.value)
+                        }
                     />
-                    {errors.password_confirmation && <FieldError data-testid="password_confirmation-error">{errors.password_confirmation}</FieldError>}
+                    {errors.password_confirmation && (
+                        <FieldError data-testid="password_confirmation-error">
+                            {errors.password_confirmation}
+                        </FieldError>
+                    )}
                 </Field>
 
-                <Button type="submit" className="mt-3 w-full" disabled={processing}>
+                <Button
+                    type="submit"
+                    className="mt-3 w-full"
+                    disabled={processing}
+                >
                     {t('Reset Password')}
                 </Button>
             </form>

@@ -36,7 +36,11 @@ export default function Login() {
         >
             <SocialiteProviders />
 
-            <form onSubmit={handleSubmit} className="space-y-3" data-testid="login-form">
+            <form
+                onSubmit={handleSubmit}
+                className="space-y-3"
+                data-testid="login-form"
+            >
                 <Field>
                     <Label htmlFor="email">{t('Email')}</Label>
                     <Input
@@ -48,9 +52,16 @@ export default function Login() {
                         required
                         data-testid="email"
                         value={data.email}
-                        onChange={(e) => { setData('email', e.target.value); setEmail(e.target.value); }}
+                        onChange={(e) => {
+                            setData('email', e.target.value);
+                            setEmail(e.target.value);
+                        }}
                     />
-                    {errors.email && <FieldError data-testid="email-error">{errors.email}</FieldError>}
+                    {errors.email && (
+                        <FieldError data-testid="email-error">
+                            {errors.email}
+                        </FieldError>
+                    )}
                 </Field>
 
                 <Field>
@@ -65,19 +76,33 @@ export default function Login() {
                             required
                             data-testid="password"
                             value={data.password}
-                            onChange={(e) => setData('password', e.target.value)}
+                            onChange={(e) =>
+                                setData('password', e.target.value)
+                            }
                         />
                         <button
                             type="button"
                             data-testid="password-toggle"
-                            aria-label={showPassword ? t('Hide password') : t('Show password')}
+                            aria-label={
+                                showPassword
+                                    ? t('Hide password')
+                                    : t('Show password')
+                            }
                             onClick={() => setShowPassword((v) => !v)}
                             className="text-muted-foreground hover:text-foreground absolute top-1/2 right-3 -translate-y-1/2"
                         >
-                            {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                            {showPassword ? (
+                                <EyeOff className="size-4" />
+                            ) : (
+                                <Eye className="size-4" />
+                            )}
                         </button>
                     </div>
-                    {errors.password && <FieldError data-testid="password-error">{errors.password}</FieldError>}
+                    {errors.password && (
+                        <FieldError data-testid="password-error">
+                            {errors.password}
+                        </FieldError>
+                    )}
                 </Field>
 
                 <div className="flex items-center justify-between">
@@ -87,7 +112,9 @@ export default function Login() {
                             name="remember"
                             data-testid="remember-me"
                             checked={data.remember}
-                            onCheckedChange={(checked) => setData('remember', !!checked)}
+                            onCheckedChange={(checked) =>
+                                setData('remember', !!checked)
+                            }
                         />
                         <FieldLabel className="font-normal">
                             {t('Remember-me')}
@@ -105,7 +132,12 @@ export default function Login() {
                     )}
                 </div>
 
-                <Button type="submit" className="mt-3 w-full" disabled={processing} data-testid="login-button">
+                <Button
+                    type="submit"
+                    className="mt-3 w-full"
+                    disabled={processing}
+                    data-testid="login-button"
+                >
                     {t('Log in')}
                 </Button>
 

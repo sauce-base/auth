@@ -1,10 +1,10 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useT } from '@/i18n';
 import { cn } from '@/lib/utils';
 import type { User } from '@/types';
 import { router, usePage } from '@inertiajs/react';
 import { Drama, History, X } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useT } from '@/i18n';
 
 interface Impersonation {
     user: User;
@@ -41,7 +41,10 @@ export default function ImpersonationAlert() {
         if (!isExpanded) return;
 
         function handleClickOutside(e: MouseEvent) {
-            if (alertRef.current && !alertRef.current.contains(e.target as Node)) {
+            if (
+                alertRef.current &&
+                !alertRef.current.contains(e.target as Node)
+            ) {
                 collapse();
             }
         }
@@ -69,7 +72,11 @@ export default function ImpersonationAlert() {
     if (!impersonation) return null;
 
     return (
-        <div ref={alertRef} className="fixed bottom-3 right-3 z-50" data-testid="impersonation-alert">
+        <div
+            ref={alertRef}
+            className="fixed right-3 bottom-3 z-50"
+            data-testid="impersonation-alert"
+        >
             {!isExpanded ? (
                 <button
                     onClick={() => setIsExpanded(true)}
@@ -79,7 +86,10 @@ export default function ImpersonationAlert() {
                     className="animate-in fade-in zoom-in-95 relative cursor-pointer rounded-xl shadow-lg ring-2 ring-orange-500 transition-all duration-300 hover:shadow-xl hover:ring-orange-600"
                 >
                     <Avatar className="size-10 bg-gray-100">
-                        <AvatarImage src={impersonation.user.avatar} alt={impersonation.user.name} />
+                        <AvatarImage
+                            src={impersonation.user.avatar}
+                            alt={impersonation.user.name}
+                        />
                         <AvatarFallback className="bg-yellow-600 text-sm text-white">
                             {getUserInitials(impersonation.user.name)}
                         </AvatarFallback>
@@ -103,7 +113,10 @@ export default function ImpersonationAlert() {
                     </button>
                     <div className="flex items-center gap-3">
                         <Avatar className="size-11 border-2 border-amber-500">
-                            <AvatarImage src={impersonation.user.avatar} alt={impersonation.user.name} />
+                            <AvatarImage
+                                src={impersonation.user.avatar}
+                                alt={impersonation.user.name}
+                            />
                             <AvatarFallback className="bg-yellow-600 text-sm text-white">
                                 {getUserInitials(impersonation.user.name)}
                             </AvatarFallback>
@@ -114,12 +127,18 @@ export default function ImpersonationAlert() {
                                     {impersonation.user.name}
                                 </p>
                                 {impersonation.user.role && (
-                                    <span className={getRoleBadgeClasses(impersonation.user.role)}>
+                                    <span
+                                        className={getRoleBadgeClasses(
+                                            impersonation.user.role,
+                                        )}
+                                    >
                                         {impersonation.user.role}
                                     </span>
                                 )}
                             </div>
-                            <p className="text-background/80 truncate text-xs">{impersonation.user.email}</p>
+                            <p className="text-background/80 truncate text-xs">
+                                {impersonation.user.email}
+                            </p>
                         </div>
                     </div>
                     <a
@@ -143,7 +162,10 @@ export default function ImpersonationAlert() {
                                         className="hover:bg-background/20 flex w-full items-center rounded-xl text-left transition-colors"
                                     >
                                         <Avatar className="border-background/20 m-1 size-10 border-2">
-                                            <AvatarImage src={user.avatar} alt={user.name} />
+                                            <AvatarImage
+                                                src={user.avatar}
+                                                alt={user.name}
+                                            />
                                             <AvatarFallback className="bg-yellow-600/80 text-xs text-white">
                                                 {getUserInitials(user.name)}
                                             </AvatarFallback>
@@ -154,12 +176,18 @@ export default function ImpersonationAlert() {
                                                     {user.name}
                                                 </p>
                                                 {user.role && (
-                                                    <span className={getRoleBadgeClasses(user.role)}>
+                                                    <span
+                                                        className={getRoleBadgeClasses(
+                                                            user.role,
+                                                        )}
+                                                    >
                                                         {user.role}
                                                     </span>
                                                 )}
                                             </div>
-                                            <p className="text-background/70 truncate text-xs">{user.email}</p>
+                                            <p className="text-background/70 truncate text-xs">
+                                                {user.email}
+                                            </p>
                                         </div>
                                     </button>
                                 ))}

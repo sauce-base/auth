@@ -1,10 +1,13 @@
 import { Button } from '@/components/ui/button';
-import { usePage } from '@inertiajs/react';
 import { useT } from '@/i18n';
+import { usePage } from '@inertiajs/react';
 import IconGithub from '~icons/simple-icons/github';
 import IconGoogle from '~icons/simple-icons/google';
 
-type Provider = { name: string; icon: React.ComponentType<{ className?: string }> };
+type Provider = {
+    name: string;
+    icon: React.ComponentType<{ className?: string }>;
+};
 
 const providers: Provider[] = [
     { name: 'google', icon: IconGoogle },
@@ -14,7 +17,9 @@ const providers: Provider[] = [
 export default function SocialiteProviders() {
     const t = useT();
     const page = usePage();
-    const lastUsed = (page.props.auth as any)?.last_social_provider as string | undefined;
+    const lastUsed = (page.props.auth as any)?.last_social_provider as
+        | string
+        | undefined;
 
     if (!route().has('auth.socialite.redirect') || !providers.length) {
         return null;
@@ -25,9 +30,17 @@ export default function SocialiteProviders() {
             {providers.map(({ name, icon: Icon }) => (
                 <div key={name} className="relative">
                     <Button variant="outline" className="w-full" asChild>
-                        <a href={route('auth.socialite.redirect', { provider: name })}>
+                        <a
+                            href={route('auth.socialite.redirect', {
+                                provider: name,
+                            })}
+                        >
                             <Icon className="h-5 w-5" />
-                            <span>{t('Connect with :Provider', { Provider: name })}</span>
+                            <span>
+                                {t('Connect with :Provider', {
+                                    Provider: name,
+                                })}
+                            </span>
                         </a>
                     </Button>
                     {lastUsed === name && (

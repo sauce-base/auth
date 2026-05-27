@@ -25,7 +25,11 @@ export default function ForgotPassword() {
                 'Forgot your password? No problem. Just let us know your email address and we will email you a password reset link that will allow you to choose a new one.',
             )}
         >
-            <form onSubmit={handleSubmit} className="w-full space-y-3" data-testid="forgot-password-form">
+            <form
+                onSubmit={handleSubmit}
+                className="w-full space-y-3"
+                data-testid="forgot-password-form"
+            >
                 <Field>
                     <Label htmlFor="email">{t('Email')}</Label>
                     <Input
@@ -39,7 +43,11 @@ export default function ForgotPassword() {
                         value={data.email}
                         onChange={(e) => setData('email', e.target.value)}
                     />
-                    {errors.email && <FieldError data-testid="email-error">{errors.email}</FieldError>}
+                    {errors.email && (
+                        <FieldError data-testid="email-error">
+                            {errors.email}
+                        </FieldError>
+                    )}
                 </Field>
 
                 <div className="flex flex-col-reverse gap-2 pt-1 sm:flex-row sm:items-center sm:justify-between">
@@ -50,7 +58,11 @@ export default function ForgotPassword() {
                     >
                         {t('Back to login')}
                     </Link>
-                    <Button type="submit" disabled={processing} data-testid="reset-button">
+                    <Button
+                        type="submit"
+                        disabled={processing}
+                        data-testid="reset-button"
+                    >
                         {t('Email Password Reset Link')}
                     </Button>
                 </div>

@@ -1,7 +1,13 @@
 import AlertMessage from '@/components/AlertMessage';
 import AppLogo from '@/components/AppLogo';
 import Footer from '@/components/Footer';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
 import { Head, Link, usePage } from '@inertiajs/react';
 import type { ReactNode } from 'react';
 
@@ -13,7 +19,13 @@ interface AuthCardLayoutProps {
     outside?: ReactNode;
 }
 
-export default function AuthCardLayout({ title, description, cardClass, children, outside }: AuthCardLayoutProps) {
+export default function AuthCardLayout({
+    title,
+    description,
+    cardClass,
+    children,
+    outside,
+}: AuthCardLayoutProps) {
     const page = usePage();
     const status = page.props.status as string | undefined;
     const error = page.props.error as string | undefined;

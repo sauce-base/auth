@@ -1,8 +1,8 @@
-import '@modules/auth/resources/css/style.css';
 import { useDialog } from '@/composables/useDialog';
 import { registerGlobalComponent } from '@/lib/globalComponents';
 import { registerAction, registerIcon } from '@/lib/navigation';
 import { router } from '@inertiajs/vue3';
+import '@modules/auth/resources/css/style.css';
 import { trans } from 'laravel-vue-i18n';
 import { LogOut } from 'lucide-vue-next';
 import IconLogOut from '~icons/lucide/log-out';

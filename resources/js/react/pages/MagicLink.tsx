@@ -18,9 +18,15 @@ export default function MagicLink() {
     return (
         <AuthCardLayout
             title={t('Magic Link Login')}
-            description={t('Enter your email to receive a secure, one-time login link.')}
+            description={t(
+                'Enter your email to receive a secure, one-time login link.',
+            )}
         >
-            <form onSubmit={handleSubmit} className="w-full space-y-3" data-testid="magic-link-form">
+            <form
+                onSubmit={handleSubmit}
+                className="w-full space-y-3"
+                data-testid="magic-link-form"
+            >
                 <Field>
                     <Label htmlFor="email">{t('Email')}</Label>
                     <Input
@@ -45,7 +51,11 @@ export default function MagicLink() {
                     >
                         {t('Back to login')}
                     </Link>
-                    <Button type="submit" disabled={processing} data-testid="magic-link-submit">
+                    <Button
+                        type="submit"
+                        disabled={processing}
+                        data-testid="magic-link-submit"
+                    >
                         {t('Send Magic Link')}
                     </Button>
                 </div>
