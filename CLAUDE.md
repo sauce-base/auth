@@ -19,6 +19,14 @@ Authentication, registration, magic link (passwordless), password reset, email v
 | Layout | `AuthCardLayout` — card with logo, status alerts, page transitions |
 | Component | `SocialiteProviders` — Google/GitHub buttons with divider |
 
+## Frontend
+
+Follows the dual-framework pattern (see root `CLAUDE.md` → Architecture > Frontend).
+
+- Both `resources/js/vue/` and `resources/js/react/` exist and must stay in sync
+- `resources/js/app.ts` is a generated re-export — do not edit it directly
+- `registerIcon()`, `registerAction()`, `registerGlobalComponent()` calls in `setup()` must be mirrored in both framework implementations
+
 ## Routes
 
 **Guest routes** (`/auth/*`): login (GET/POST), register (GET/POST), forgot-password (GET/POST), reset-password/{token} (GET, signed), reset-password (POST, throttle:6,1), magic-link (GET/POST, throttle:5,1)
