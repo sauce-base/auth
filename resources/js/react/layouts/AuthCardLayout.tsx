@@ -59,9 +59,8 @@ export default function AuthCardLayout({
                         </CardContent>
                     </Card>
                 </div>
-                {outside}
+            <div className="mt-16 w-full pt-8">
+                <Footer />
             </div>
-            <Footer />
-        </div>
     );
 }
