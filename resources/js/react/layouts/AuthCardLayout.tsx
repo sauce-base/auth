@@ -47,14 +47,14 @@ export default function AuthCardLayout({
                             <CardDescription>{description}</CardDescription>
                         </CardHeader>
                         <CardContent className="px-8">
-                            {(status || error) && (
+                            {status || error ? (
                                 <div data-testid="alert">
                                     <AlertMessage
                                         message={status || error}
                                         variant={status ? 'success' : 'error'}
                                     />
                                 </div>
-                            )}
+                            ) : null}
                             {children}
                         </CardContent>
                     </Card>
