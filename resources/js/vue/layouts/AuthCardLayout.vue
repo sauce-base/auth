@@ -21,7 +21,7 @@ defineProps<{
 </script>
 
 <template>
-    <div class="flex h-screen flex-col items-center gap-6">
+    <div class="flex min-h-screen flex-col items-center gap-6">
         <div class="mt-6">
             <Head :title="title" />
             <Link :href="route('index')" class="mt-6 font-medium">
@@ -61,6 +61,6 @@ defineProps<{
             </div>
             <slot name="outside" />
         </div>
-        <Footer class="mt-16 w-full pt-35" />
+        <Footer class="mt-16 w-full pt-8" />
     </div>
 </template>
