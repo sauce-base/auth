@@ -3,7 +3,7 @@
   "description": "Authentication module for Saucebase",
   "type": "saucebase-module",
   "license": "proprietary",
-  "version": "1.8.1",
+  "version": "v2.1.0",
   "authors": [
     {
       "name": "Saucebase",
