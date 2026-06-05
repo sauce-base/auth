@@ -11,6 +11,9 @@
     }
   ],
   "extra": {
+    "saucebase": {
+      "frameworks": ["vue", "react"]
+    },
     "laravel": {
       "providers": [
         "Modules\\Auth\\Providers\\AuthServiceProvider"
