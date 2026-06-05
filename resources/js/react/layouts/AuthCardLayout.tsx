@@ -31,7 +31,7 @@ export default function AuthCardLayout({
     const error = page.props.error as string | undefined;
 
     return (
-        <div className="flex h-screen flex-col items-center gap-6">
+        <div className="flex min-h-dvh flex-col items-center gap-6">
             <div className="mt-6">
                 <Head title={title} />
                 <Link href={route('index')} className="mt-6 font-medium">
