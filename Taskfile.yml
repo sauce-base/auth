@@ -5,7 +5,7 @@ tasks:
     # ── Testing ───────────────────────────────────────────────────
     test:php:
         desc: Run PHPUnit tests for Auth module
-        cmd: '{{.APP}} php artisan test --testsuite=Modules --filter=''^Modules\\Auth\\Tests'''
+        cmd: 'php artisan test --testsuite=Modules --filter=''^Modules\\Auth\\Tests'''
 
     test:e2e:
         desc: Run E2E tests for Auth module
@@ -17,6 +17,10 @@ tasks:
     db:seed:
         desc: Seed the Auth module database
         cmd: '{{.APP}} php artisan modules:seed --module=auth'
+    
+    make-admin:
+        desc: Promote an user to Admin
+        cmd: '{{.APP}} php artisan auth:make-admin'
 
     # ── Code Generation ────────────────────────────────────────────
 
