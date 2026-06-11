@@ -2,6 +2,8 @@ import { test, expect } from '@e2e/fixtures';
 import { LoginPage } from '../../pages/LoginPage';
 
 test.describe('Login Security', () => {
+    test.describe.configure({ mode: 'serial' });
+
     let loginPage: LoginPage;
 
     test.beforeEach(async ({ page }) => {
@@ -10,8 +12,7 @@ test.describe('Login Security', () => {
     });
 
     test.describe('Rate Limiting', () => {
-        test.describe.configure({ mode: 'serial' });
-
+        
         test('blocks login after too many failed attempts', async () => {
             const invalidUser = { email: 'invalid@example.com', password: 'wrongpassword' };
 
