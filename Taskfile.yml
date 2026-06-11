@@ -5,7 +5,7 @@ tasks:
     # ── Testing ───────────────────────────────────────────────────
     test:php:
         desc: Run PHPUnit tests for Auth module
-        cmd: php artisan test --testsuite=Modules --filter='^Modules\\Auth\\Tests'
+        cmd: '{{.APP}} php artisan test --testsuite=Modules --filter=''^Modules\\Auth\\Tests'''
 
     test:e2e:
         desc: Run E2E tests for Auth module
@@ -16,10 +16,10 @@ tasks:
 
     db:seed:
         desc: Seed the Auth module database
-        cmd: php artisan modules:seed --module=auth
+        cmd: '{{.APP}} php artisan modules:seed --module=auth'
 
     # ── Code Generation ────────────────────────────────────────────
 
     types:generate:
         desc: Generate TypeScript types from PHP DTOs and enums
-        cmd: php artisan module:generate-types auth
+        cmd: '{{.APP}} php artisan module:generate-types auth'
