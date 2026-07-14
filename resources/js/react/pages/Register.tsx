@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button';
-import { Field, FieldError } from '@/components/ui/field';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Field, FieldError, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useT } from '@/i18n';
@@ -17,12 +18,19 @@ export default function Register() {
         email: '',
         password: '',
         password_confirmation: '',
+        terms: false,
     });
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         post(route('register'), { preserveScroll: true });
     };
+
+    const canSubmit =
+        data.name.trim() !== '' &&
+        data.email.trim() !== '' &&
+        data.password !== '' &&
+        data.terms;
 
     return (
         <AuthCardLayout
@@ -115,10 +123,53 @@ export default function Register() {
                     )}
                 </Field>
 
+                <Field
+                    orientation="horizontal"
+                    className="mt-6 items-start"
+                    data-invalid={!!errors.terms}
+                >
+                    <Checkbox
+                        id="terms"
+                        name="terms"
+                        data-testid="terms-checkbox"
+                        checked={data.terms}
+                        onCheckedChange={(checked) =>
+                            setData('terms', !!checked)
+                        }
+                        aria-invalid={!!errors.terms}
+                    />
+                    <FieldLabel
+                        htmlFor="terms"
+                        className="text-sm font-normal leading-snug"
+                    >
+                        {t('I agree to the')}{' '}
+                        <Link
+                            href={route('terms')}
+                            className="text-primary font-medium underline-offset-4 hover:underline"
+                            data-testid="terms-link"
+                        >
+                            {t('Terms of Service')}
+                        </Link>{' '}
+                        {t('and the')}{' '}
+                        <Link
+                            href={route('privacy')}
+                            className="text-primary font-medium underline-offset-4 hover:underline"
+                            data-testid="privacy-link"
+                        >
+                            {t('Privacy Policy')}
+                        </Link>
+                    </FieldLabel>
+                </Field>
+                {errors.terms && (
+                    <FieldError data-testid="terms-error">
+                        {errors.terms}
+                    </FieldError>
+                )}
+
                 <Button
                     type="submit"
                     className="mt-3 w-full"
-                    disabled={processing}
+                    disabled={processing || !canSubmit}
                     data-testid="register-button"
                 >
                     {t('Register')}
@@ -128,7 +179,7 @@ export default function Register() {
                     {t('Already registered?')}{' '}
                     <Link
                         href={route('login')}
-                        className="text-primary/70 font-medium underline-offset-4 hover:underline"
+                        className="text-primary font-medium underline-offset-4 hover:underline"
                         data-testid="login-link"
                     >
                         {t('Log in')}

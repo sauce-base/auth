@@ -12,6 +12,7 @@ export class RegisterPage {
     readonly emailInput: Locator;
     readonly passwordInput: Locator;
     readonly passwordToggle: Locator;
+    readonly termsCheckbox: Locator;
     readonly registerButton: Locator;
     readonly signupEndpoint: string;
     readonly redirectEndpoint: string;
@@ -27,6 +28,7 @@ export class RegisterPage {
         this.emailInput = page.getByTestId('email');
         this.passwordInput = page.getByTestId('password');
         this.passwordToggle = page.getByTestId('password-toggle');
+        this.termsCheckbox = page.getByTestId('terms-checkbox');
         this.registerButton = page.getByTestId('register-button');
     }
 
@@ -38,6 +40,7 @@ export class RegisterPage {
         await this.nameInput.fill(name);
         await this.emailInput.fill(email);
         await this.passwordInput.fill(password);
+        await this.termsCheckbox.check();
 
         await this.registerButton.click();
     }
@@ -47,6 +50,7 @@ export class RegisterPage {
         await expect(this.nameInput).toBeVisible();
         await expect(this.emailInput).toBeVisible();
         await expect(this.passwordInput).toBeVisible();
+        await expect(this.termsCheckbox).toBeVisible();
         await expect(this.registerButton).toBeVisible();
     }
 
