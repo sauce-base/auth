@@ -124,7 +124,7 @@ export default function Login() {
                     {route().has('password.request') && (
                         <Link
                             href={forgotUrl}
-                            className="text-primary ml-auto inline-block text-sm font-medium underline-offset-4 hover:underline"
+                            className="text-primary ml-auto inline-block text-sm font-medium whitespace-nowrap underline-offset-4 hover:underline"
                             data-testid="forgot-password-link"
                         >
                             {t('Forgot your password?')}
@@ -145,7 +145,7 @@ export default function Login() {
                     {(page.props.auth as any)?.magic_link_enabled && (
                         <Link
                             href={route('magic-link.create')}
-                            className="text-primary/70 font-medium underline-offset-4 hover:underline"
+                            className="text-primary font-medium underline-offset-4 hover:underline"
                             data-testid="magic-link-login-link"
                         >
                             {t('Login with magic link')}

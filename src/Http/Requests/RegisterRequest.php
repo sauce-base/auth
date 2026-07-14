@@ -29,6 +29,19 @@ class RegisterRequest extends FormRequest
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:'.User::class,
             'password' => ['required', Rules\Password::defaults()],
+            'terms' => ['accepted'],
+        ];
+    }
+
+    /**
+     * Get the error messages for the defined validation rules.
+     *
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        return [
+            'terms.accepted' => __('You must accept the Terms of Service and Privacy Policy to register.'),
         ];
     }
 

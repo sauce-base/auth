@@ -52,9 +52,24 @@ test.describe.parallel('Register Basics', () => {
         await registerPage.nameInput.fill(user.name);
         await registerPage.emailInput.fill(user.email);
         await registerPage.passwordInput.fill(user.password);
+        await registerPage.termsCheckbox.check();
 
         await registerPage.passwordInput.press('Enter');
 
         await expectSuccessfulRegistration();
+    });
+
+    test('disables register button until all fields are filled and terms are accepted', async () => {
+        const user = newUser();
+
+        await expect(registerPage.registerButton).toBeDisabled();
+
+        await registerPage.nameInput.fill(user.name);
+        await registerPage.emailInput.fill(user.email);
+        await registerPage.passwordInput.fill(user.password);
+        await expect(registerPage.registerButton).toBeDisabled();
+
+        await registerPage.termsCheckbox.check();
+        await expect(registerPage.registerButton).toBeEnabled();
     });
 });

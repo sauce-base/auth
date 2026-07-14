@@ -29,6 +29,7 @@ class RegisterTest extends TestCase
             'email' => 'test@example.com',
             'password' => 'password123',
             'password_confirmation' => 'password123',
+            'terms' => true,
         ]);
 
         $this->assertAuthenticated();
@@ -45,6 +46,7 @@ class RegisterTest extends TestCase
             'email' => 'test@example.com',
             'password' => 'password123',
             'password_confirmation' => 'password123',
+            'terms' => true,
         ]);
 
         $user = User::where('email', 'test@example.com')->firstOrFail();
@@ -60,6 +62,7 @@ class RegisterTest extends TestCase
             'email' => 'test@example.com',
             'password' => 'password123',
             'password_confirmation' => 'password123',
+            'terms' => true,
         ]);
 
         $user = User::where('email', 'test@example.com')->firstOrFail();
@@ -75,6 +78,7 @@ class RegisterTest extends TestCase
             'email' => 'test@example.com',
             'password' => 'password123',
             'password_confirmation' => 'password123',
+            'terms' => true,
         ]);
 
         $user = User::where('email', 'test@example.com')->firstOrFail();
@@ -134,5 +138,16 @@ class RegisterTest extends TestCase
         ]);
 
         $response->assertInvalid('password');
+    }
+
+    public function test_register_validates_terms_must_be_accepted(): void
+    {
+        $response = $this->post(route('register'), [
+            'name' => 'Test User',
+            'email' => 'test@example.com',
+            'password' => 'password123',
+        ]);
+
+        $response->assertInvalid('terms');
     }
 }
