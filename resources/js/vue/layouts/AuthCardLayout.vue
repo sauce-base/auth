@@ -1,18 +1,13 @@
 <script setup lang="ts">
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/card';
+import CardLayout from '@/layouts/CardLayout.vue';
 
-import AlertMessage from '@/components/AlertMessage.vue';
-import AppLogo from '@/components/AppLogo.vue';
-import Footer from '@/components/Footer.vue';
-import PageTransition from '@/components/PageTransition.vue';
-import { Head, Link } from '@inertiajs/vue3';
-
+/**
+ * The auth module's name for the shared centred-card layout.
+ *
+ * The presentation moved to core so that naming a workspace looks like signing up rather
+ * than like a different product. This wrapper stays so the module's pages keep their own
+ * vocabulary, and so anything auth-specific has an obvious home later.
+ */
 defineProps<{
     title?: string;
     description?: string;
@@ -21,46 +16,15 @@ defineProps<{
 </script>
 
 <template>
-    <div class="flex min-h-dvh flex-col items-center gap-6">
-        <div class="mt-6">
-            <Head :title="title" />
-            <Link :href="route('index')" class="mt-6 font-medium">
-                <AppLogo size="md" :showText="true" />
-            </Link>
-        </div>
+    <CardLayout
+        :title="title"
+        :description="description"
+        :card-class="cardClass"
+    >
+        <slot />
 
-        <div class="flex w-full grow flex-col items-center">
-            <div
-                class="w-full px-4 min-[450px]:w-auto min-[450px]:min-w-md min-[450px]:px-0"
-            >
-                <Card :class="cardClass">
-                    <CardHeader class="px-8 text-center">
-                        <CardTitle class="text-2xl">
-                            {{ title }}
-                        </CardTitle>
-                        <CardDescription>
-                            {{ description }}
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent class="px-8">
-                        <PageTransition>
-                            <AlertMessage
-                                :message="
-                                    $page.props.status || $page.props.error
-                                "
-                                :variant="
-                                    $page.props.status ? 'success' : 'error'
-                                "
-                                class="mt-4"
-                                data-testid="alert"
-                            />
-                            <slot />
-                        </PageTransition>
-                    </CardContent>
-                </Card>
-            </div>
+        <template #outside>
             <slot name="outside" />
-        </div>
-        <Footer class="mt-16 w-full pt-8" />
-    </div>
+        </template>
+    </CardLayout>
 </template>

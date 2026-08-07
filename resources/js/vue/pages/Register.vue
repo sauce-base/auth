@@ -84,7 +84,10 @@ const canSubmit = computed(
                     :aria-invalid="!!termsError"
                     v-model="termsRef"
                 />
-                <FieldLabel for="terms" class="text-sm font-normal leading-snug">
+                <FieldLabel
+                    for="terms"
+                    class="text-sm leading-snug font-normal"
+                >
                     {{ $t('I agree to the') }}
                     <Link
                         :href="route('terms')"

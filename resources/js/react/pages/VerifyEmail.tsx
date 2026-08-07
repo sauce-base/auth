@@ -16,7 +16,7 @@ export default function VerifyEmail() {
         <AuthCardLayout title={t('We are glad you signed up!')}>
             <form
                 onSubmit={handleSubmit}
-                className="min-w-sm max-w-md space-y-3 text-center"
+                className="max-w-md min-w-sm space-y-3 text-center"
                 data-testid="verify-email-form"
             >
                 <p className="mb-3 leading-relaxed text-gray-600 dark:text-gray-400">

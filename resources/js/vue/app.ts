@@ -2,9 +2,9 @@ import { useDialog } from '@/composables/useDialog';
 import { registerGlobalComponent } from '@/lib/globalComponents';
 import { registerAction, registerIcon } from '@/lib/navigation';
 import { router } from '@inertiajs/vue3';
+import { LogOut } from '@lucide/vue';
 import '@modules/auth/resources/css/style.css';
 import { trans } from 'laravel-vue-i18n';
-import { LogOut } from '@lucide/vue';
 import IconLogOut from '~icons/lucide/log-out';
 import ImpersonationAlert from './components/ImpersonationAlert.vue';
 
