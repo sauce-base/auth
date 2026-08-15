@@ -31,11 +31,11 @@ test.describe.parallel('Verify Email Basics', () => {
         await registerPage.expectToBeVisible();
         await registerPage.register(user.name, user.email, user.password);
 
-        await verifyEmailPage.expectRedirectTo(registerPage.redirectEndpoint);
+        await verifyEmailPage.expectRedirectTo('/auth/verify-email');
         await verifyEmailPage.expectToBeVisible();
 
         await verifyEmailPage.page.goto('/dashboard');
 
-        await verifyEmailPage.expectRedirectTo(registerPage.redirectEndpoint);
+        await verifyEmailPage.expectRedirectTo('/auth/verify-email');
     });
 });

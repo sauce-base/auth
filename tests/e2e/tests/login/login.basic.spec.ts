@@ -1,4 +1,5 @@
 import { test, expect } from '@e2e/fixtures';
+import { expectAuthenticated } from '@e2e/helpers/auth';
 import { LoginPage } from '../../pages/LoginPage';
 
 test.describe.parallel('Login Basics', () => {
@@ -10,19 +11,26 @@ test.describe.parallel('Login Basics', () => {
         await loginPage.expectToBeVisible();
     });
 
+    // Not `toHaveURL('/dashboard')`: the post-login landing page depends on
+    // which modules are installed (e.g. tenancy redirects elsewhere), so the
+    // only thing this test can rely on is that login actually authenticated.
     async function expectSuccessfulLogin() {
-        await expect(loginPage.page).toHaveURL('/dashboard');
+        await expectAuthenticated(loginPage.page);
     }
 
     test('logs in with valid credentials and redirects to dashboard', async ({ credentials }) => {
         const user = credentials.admin;
+        const loginResponse = loginPage.waitForLoginResponse();
         await loginPage.login(user.email, user.password);
+        await loginResponse;
         await expectSuccessfulLogin();
     });
 
     test('logs in with remember me option', async ({ credentials }) => {
         const user = credentials.user;
+        const loginResponse = loginPage.waitForLoginResponse();
         await loginPage.login(user.email, user.password, true);
+        await loginResponse;
 
         await expect(loginPage.rememberCheckbox).toBeChecked();
         await expectSuccessfulLogin();
@@ -33,12 +41,15 @@ test.describe.parallel('Login Basics', () => {
         credentials,
     }) => {
         const user = credentials.user;
+        const loginResponse = loginPage.waitForLoginResponse();
         await loginPage.login(user.email, user.password);
+        await loginResponse;
         await expectSuccessfulLogin();
 
         await page.goto('/auth/login');
 
-        await expect(page).toHaveURL('/dashboard');
+        await expect(page).not.toHaveURL(/\/auth\/login/);
+        await expectAuthenticated(page);
     });
 
     test('toggles password visibility', async ({ credentials }) => {
@@ -59,7 +70,9 @@ test.describe.parallel('Login Basics', () => {
         await loginPage.emailInput.fill(user.email);
         await loginPage.passwordInput.fill(user.password);
 
+        const loginResponse = loginPage.waitForLoginResponse();
         await loginPage.passwordInput.press('Enter');
+        await loginResponse;
 
         await expectSuccessfulLogin();
     });
