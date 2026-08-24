@@ -140,7 +140,7 @@ export default function Register() {
                     />
                     <FieldLabel
                         htmlFor="terms"
-                        className="text-sm font-normal leading-snug"
+                        className="text-sm leading-snug font-normal"
                     >
                         {t('I agree to the')}{' '}
                         <Link

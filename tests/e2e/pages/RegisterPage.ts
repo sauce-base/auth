@@ -15,7 +15,6 @@ export class RegisterPage {
     readonly termsCheckbox: Locator;
     readonly registerButton: Locator;
     readonly signupEndpoint: string;
-    readonly redirectEndpoint: string;
 
     /** Indicates if email verification is required after registration */
     readonly userMustVerifyEmail: boolean = false;
@@ -23,7 +22,6 @@ export class RegisterPage {
     constructor(page: Page) {
         this.page = page;
         this.signupEndpoint = '/auth/register';
-        this.redirectEndpoint = this.userMustVerifyEmail ? '/auth/verify-email' : '/dashboard';
         this.nameInput = page.getByTestId('name');
         this.emailInput = page.getByTestId('email');
         this.passwordInput = page.getByTestId('password');

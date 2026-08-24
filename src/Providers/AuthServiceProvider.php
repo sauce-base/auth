@@ -7,6 +7,7 @@ use App\Providers\ModuleServiceProvider;
 use Filament\Facades\Filament;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
+use Modules\Auth\Settings\AuthSettings;
 use Spatie\Permission\Models\Role;
 use STS\FilamentImpersonate\ImpersonateManager;
 
@@ -19,7 +20,10 @@ class AuthServiceProvider extends ModuleServiceProvider
     {
         Inertia::share('auth.user', fn () => Auth::user());
         Inertia::share('auth.last_social_provider', fn () => request()->cookie('last_social_provider'));
-        Inertia::share('auth.magic_link_enabled', fn () => config('auth.magic_link.enabled', true));
+        Inertia::share(
+            'auth.magic_link_enabled',
+            fn (): bool => $this->app->make(AuthSettings::class)->magic_link_enabled,
+        );
 
         Inertia::share('impersonation', function () {
             if (! $this->isUserImpersonated()) {

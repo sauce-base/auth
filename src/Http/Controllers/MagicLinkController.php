@@ -15,9 +15,12 @@ use Inertia\Response;
 use Modules\Auth\Http\Middleware\EnsureMagicLinkEnabled;
 use Modules\Auth\Models\MagicLinkToken;
 use Modules\Auth\Notifications\MagicLinkNotification;
+use Modules\Auth\Settings\AuthSettings;
 
 class MagicLinkController extends Controller implements HasMiddleware
 {
+    public function __construct(private readonly AuthSettings $settings) {}
+
     public static function middleware(): array
     {
         return [
@@ -53,7 +56,7 @@ class MagicLinkController extends Controller implements HasMiddleware
                 ['user_id' => $user->id],
                 [
                     'token' => hash('sha256', $plainToken),
-                    'expires_at' => now()->addMinutes(config('auth.magic_link.expiry', 15)),
+                    'expires_at' => now()->addMinutes($this->settings->magic_link_expiry),
                     'used_at' => null,
                 ]
             );
@@ -64,7 +67,10 @@ class MagicLinkController extends Controller implements HasMiddleware
                 $url .= '?intended='.urlencode($request->session()->get('url.intended'));
             }
 
-            $user->notify(new MagicLinkNotification($url));
+            $user->notify(new MagicLinkNotification(
+                url: $url,
+                expiry: $this->settings->magic_link_expiry,
+            ));
         }
 
         return back()->with('status', __('auth::auth.magic-link-sent'));

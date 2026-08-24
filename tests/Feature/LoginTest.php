@@ -5,6 +5,8 @@ namespace Modules\Auth\Tests\Feature;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
+use Inertia\Testing\AssertableInertia;
+use Modules\Auth\Settings\AuthSettings;
 use Tests\TestCase;
 
 class LoginTest extends TestCase
@@ -16,6 +18,18 @@ class LoginTest extends TestCase
         $response = $this->get(route('login'));
 
         $response->assertStatus(200);
+    }
+
+    public function test_login_page_receives_magic_link_availability_from_auth_settings(): void
+    {
+        $settings = app(AuthSettings::class);
+        $settings->magic_link_enabled = false;
+        $settings->save();
+
+        $this->get(route('login'))
+            ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
+                ->where('auth.magic_link_enabled', false)
+            );
     }
 
     public function test_authenticated_user_is_redirected_from_login(): void

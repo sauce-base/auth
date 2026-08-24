@@ -1,15 +1,30 @@
 import { test, expect } from '@e2e/fixtures';
+import { expectAuthenticated } from '@e2e/helpers/auth';
+import { isModuleInstalled } from '@e2e/helpers/modules';
+
+// These tests exercise the dashboard sidebar/topbar chrome itself, not just
+// login. Under tenancy, an authenticated visitor is never left on `/dashboard`
+// (see modules/tenancy/src/Http/Middleware/EnsureWorkspace.php) — a
+// workspace-less test user is funnelled to a workspace picker/create form
+// instead, which doesn't have this chrome. Tenancy's own e2e suite covers
+// the equivalent UI inside a workspace, so skip here rather than assert on
+// UI this module doesn't control in that combination.
+async function skipIfTenancyInstalled(laravel: Parameters<typeof isModuleInstalled>[0]) {
+    test.skip(await isModuleInstalled(laravel, 'tenancy'), 'dashboard chrome is covered by tenancy\'s own e2e suite when tenancy is installed');
+}
 
 test.describe.parallel('Sidebar layout', () => {
-    test('renders tenant switcher in sidebar header', async ({ page, credentials, loginAs }) => {
+    test('renders tenant switcher in sidebar header', async ({ page, laravel, credentials, loginAs }) => {
+        await skipIfTenancyInstalled(laravel);
         await loginAs(credentials.user);
         await page.goto('/dashboard');
-        await expect(page).toHaveURL('/dashboard');
+        await expectAuthenticated(page);
 
         await expect(page.getByTestId('tenant-switcher')).toBeVisible();
     });
 
-    test('user dropdown contains language and theme selectors', async ({ page, credentials, loginAs }) => {
+    test('user dropdown contains language and theme selectors', async ({ page, laravel, credentials, loginAs }) => {
+        await skipIfTenancyInstalled(laravel);
         await loginAs(credentials.user);
         await page.goto('/dashboard');
 
@@ -19,7 +34,8 @@ test.describe.parallel('Sidebar layout', () => {
         await expect(page.getByTestId('theme-selector-trigger')).toBeVisible();
     });
 
-    test('language selector submenu opens', async ({ page, credentials, loginAs }) => {
+    test('language selector submenu opens', async ({ page, laravel, credentials, loginAs }) => {
+        await skipIfTenancyInstalled(laravel);
         await loginAs(credentials.user);
         await page.goto('/dashboard');
 
@@ -29,7 +45,8 @@ test.describe.parallel('Sidebar layout', () => {
         await expect(page.locator('[data-slot="dropdown-menu-sub-content"]')).toBeVisible();
     });
 
-    test('theme selector submenu opens', async ({ page, credentials, loginAs }) => {
+    test('theme selector submenu opens', async ({ page, laravel, credentials, loginAs }) => {
+        await skipIfTenancyInstalled(laravel);
         await loginAs(credentials.user);
         await page.goto('/dashboard');
 
@@ -41,10 +58,11 @@ test.describe.parallel('Sidebar layout', () => {
 });
 
 test.describe('Theme persistence', () => {
-    test('dark theme persists across navigation via cookie', async ({ page, credentials, loginAs }) => {
+    test('dark theme persists across navigation via cookie', async ({ page, laravel, credentials, loginAs }) => {
+        await skipIfTenancyInstalled(laravel);
         await loginAs(credentials.user);
         await page.goto('/dashboard');
-        await expect(page).toHaveURL(/dashboard/);
+        await expectAuthenticated(page);
 
         // Select dark via the UI — this writes localStorage + cookie
         await page.getByTestId('user-menu-trigger').click();
@@ -59,10 +77,11 @@ test.describe('Theme persistence', () => {
         await expect(page.locator('html')).toHaveClass(/dark/);
     });
 
-    test('light theme does not add dark class after navigation', async ({ page, credentials, loginAs }) => {
+    test('light theme does not add dark class after navigation', async ({ page, laravel, credentials, loginAs }) => {
+        await skipIfTenancyInstalled(laravel);
         await loginAs(credentials.user);
         await page.goto('/dashboard');
-        await expect(page).toHaveURL(/dashboard/);
+        await expectAuthenticated(page);
 
         // Select light via the UI
         await page.getByTestId('user-menu-trigger').click();
@@ -76,7 +95,8 @@ test.describe('Theme persistence', () => {
         await expect(page.locator('html')).not.toHaveClass(/dark/);
     });
 
-    test('system preference dark mode applied before hydration', async ({ page, credentials, loginAs }) => {
+    test('system preference dark mode applied before hydration', async ({ page, laravel, credentials, loginAs }) => {
+        await skipIfTenancyInstalled(laravel);
         await page.emulateMedia({ colorScheme: 'dark' });
         await loginAs(credentials.user);
         await page.goto('/dashboard');
@@ -84,7 +104,8 @@ test.describe('Theme persistence', () => {
         await expect(page.locator('html')).toHaveClass(/dark/);
     });
 
-    test('dark mode toggle writes to appearance localStorage key, not vueuse-dark', async ({ page, credentials, loginAs }) => {
+    test('dark mode toggle writes to appearance localStorage key, not vueuse-dark', async ({ page, laravel, credentials, loginAs }) => {
+        await skipIfTenancyInstalled(laravel);
         await loginAs(credentials.user);
         await page.goto('/dashboard');
 
@@ -100,7 +121,8 @@ test.describe('Theme persistence', () => {
         expect(wrongKey).toBeNull();
     });
 
-    test('dark mode toggle writes appearance cookie for server-side persistence', async ({ page, credentials, loginAs }) => {
+    test('dark mode toggle writes appearance cookie for server-side persistence', async ({ page, laravel, credentials, loginAs }) => {
+        await skipIfTenancyInstalled(laravel);
         await loginAs(credentials.user);
         await page.goto('/dashboard');
 

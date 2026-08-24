@@ -2,6 +2,7 @@
 
 namespace Modules\Auth\Http\Controllers;
 
+use App\Helpers\Toast;
 use App\Models\User;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -25,6 +26,8 @@ class VerifyEmailController extends Controller
 
         if ($user->markEmailAsVerified()) {
             event(new Verified($user));
+
+            Toast::success(__('Email verified'), __('Your email address has been confirmed.'));
         }
 
         return redirect()->intended(route('dashboard', absolute: false).'?verified=1');
