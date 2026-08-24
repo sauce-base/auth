@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
+use Modules\Auth\Events\ReturningUserAuthenticated;
 use Modules\Auth\Http\Middleware\EnsureMagicLinkEnabled;
 use Modules\Auth\Models\MagicLinkToken;
 use Modules\Auth\Notifications\MagicLinkNotification;
@@ -104,6 +105,13 @@ class MagicLinkController extends Controller implements HasMiddleware
         Auth::login($user);
 
         $request->session()->regenerate();
+
+        ReturningUserAuthenticated::dispatch(
+            $user,
+            now(),
+            $request->ip(),
+            $request->userAgent(),
+        );
 
         Toast::default(__('auth::auth.welcome-back', ['name' => $user->name]));
 

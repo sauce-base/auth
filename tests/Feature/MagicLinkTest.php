@@ -6,6 +6,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
 use Modules\Auth\Models\MagicLinkToken;
+use Modules\Auth\Notifications\LoginNotification;
 use Modules\Auth\Notifications\MagicLinkNotification;
 use Modules\Auth\Settings\AuthSettings;
 use Tests\TestCase;
@@ -80,6 +81,36 @@ class MagicLinkTest extends TestCase
 
         $this->assertAuthenticated();
         $response->assertRedirect(route('dashboard'));
+    }
+
+    public function test_returning_user_receives_login_notification_after_magic_link_authentication(): void
+    {
+        Notification::fake();
+
+        $settings = app(AuthSettings::class);
+        $settings->login_notification_enabled = true;
+        $settings->save();
+
+        $user = $this->createUser();
+        $plainToken = Str::random(64);
+
+        MagicLinkToken::create([
+            'user_id' => $user->id,
+            'token' => hash('sha256', $plainToken),
+            'expires_at' => now()->addMinutes(15),
+        ]);
+
+        $this->withServerVariables([
+            'REMOTE_ADDR' => '203.0.113.11',
+            'HTTP_USER_AGENT' => 'Magic Browser 1.0',
+        ])->get(route('magic-link.authenticate', $plainToken));
+
+        Notification::assertSentTo(
+            $user,
+            LoginNotification::class,
+            fn (LoginNotification $notification): bool => $notification->ipAddress === '203.0.113.11'
+                && $notification->userAgent === 'Magic Browser 1.0',
+        );
     }
 
     public function test_authentication_fails_with_expired_token(): void

@@ -19,7 +19,6 @@ class AuthenticationSettings extends SettingsPage
 
     protected static string $settings = AuthSettings::class;
 
-
     public static function getNavigationLabel(): string
     {
         return __('Authentication');
@@ -45,6 +44,15 @@ class AuthenticationSettings extends SettingsPage
                         ->required()
                         ->minValue(1)
                         ->suffix(__('minutes')),
+                ])
+                ->columns(1),
+            Section::make(__('auth::auth.notifications.title'))
+                ->description(__('auth::auth.notifications.description'))
+                ->icon(Heroicon::OutlinedBellAlert)
+                ->schema([
+                    Toggle::make('login_notification_enabled')
+                        ->label(__('auth::auth.notifications.login-enabled'))
+                        ->helperText(__('auth::auth.notifications.login-help')),
                 ])
                 ->columns(1),
         ]);

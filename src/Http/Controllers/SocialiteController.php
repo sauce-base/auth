@@ -3,10 +3,12 @@
 namespace Modules\Auth\Http\Controllers;
 
 use App\Helpers\Toast;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Socialite\Facades\Socialite;
 use Laravel\Socialite\Two\User;
+use Modules\Auth\Events\ReturningUserAuthenticated;
 use Modules\Auth\Exceptions\SocialiteException;
 use Modules\Auth\Services\SocialiteService;
 use Symfony\Component\HttpFoundation\Response as RedirectResponse;
@@ -25,7 +27,7 @@ class SocialiteController extends Controller
         return Socialite::driver($provider)->redirect();
     }
 
-    public function callback(string $provider): RedirectResponse
+    public function callback(Request $request, string $provider): RedirectResponse
     {
         $validator = Validator::make(['provider' => $provider], [
             'provider' => 'required|string',
@@ -57,7 +59,16 @@ class SocialiteController extends Controller
 
         Auth::login($user);
 
-        request()->session()->regenerate();
+        $request->session()->regenerate();
+
+        if (! $user->wasRecentlyCreated) {
+            ReturningUserAuthenticated::dispatch(
+                $user,
+                now(),
+                $request->ip(),
+                $request->userAgent(),
+            );
+        }
 
         Toast::default(
             __($user->wasRecentlyCreated ? 'auth::auth.welcome' : 'auth::auth.welcome-back', [

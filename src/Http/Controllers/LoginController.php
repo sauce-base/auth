@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
+use Modules\Auth\Events\ReturningUserAuthenticated;
 use Modules\Auth\Exceptions\AuthException;
 use Modules\Auth\Http\Requests\LoginRequest;
 
@@ -36,9 +37,16 @@ class LoginController extends Controller
             return back()->with(['error' => $e->getMessage()]);
         }
 
-        Auth::login($user, request()->boolean('remember'));
+        Auth::login($user, $request->boolean('remember'));
 
-        request()->session()->regenerate();
+        $request->session()->regenerate();
+
+        ReturningUserAuthenticated::dispatch(
+            $user,
+            now(),
+            $request->ip(),
+            $request->userAgent(),
+        );
 
         Toast::default(
             __('auth::auth.welcome-back', ['name' => $user->name]),

@@ -6,7 +6,9 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
+use Modules\Auth\Notifications\LoginNotification;
 use Modules\Auth\Notifications\WelcomeNotification;
+use Modules\Auth\Settings\AuthSettings;
 use Tests\TestCase;
 
 class RegisterTest extends TestCase
@@ -67,6 +69,27 @@ class RegisterTest extends TestCase
 
         $user = User::where('email', 'test@example.com')->firstOrFail();
         Notification::assertSentTo($user, WelcomeNotification::class);
+    }
+
+    public function test_registration_does_not_send_login_notification(): void
+    {
+        Notification::fake();
+
+        $settings = app(AuthSettings::class);
+        $settings->login_notification_enabled = true;
+        $settings->save();
+
+        $this->post(route('register'), [
+            'name' => 'Test User',
+            'email' => 'test@example.com',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+            'terms' => true,
+        ]);
+
+        $user = User::where('email', 'test@example.com')->sole();
+
+        Notification::assertNotSentTo($user, LoginNotification::class);
     }
 
     public function test_password_is_hashed_on_registration(): void
