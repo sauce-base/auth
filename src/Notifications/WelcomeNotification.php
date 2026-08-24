@@ -26,12 +26,12 @@ class WelcomeNotification extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('Welcome to '.config('app.name').'!')
-            ->greeting('Hello '.$notifiable->name.',')
-            ->line('Welcome! Your account has been created successfully.')
-            ->line('You can now explore all the features available to you.')
-            ->action('Go to Dashboard', route('dashboard'))
-            ->line('Thank you for joining us!');
+            ->subject(__('Welcome to :app!', ['app' => config('app.name')]))
+            ->greeting(__('Hello :name,', ['name' => $notifiable->name]))
+            ->line(__('Welcome! Your account has been created successfully.'))
+            ->line(__('You can now explore all the features available to you.'))
+            ->action(__('Go to Dashboard'), route('dashboard'))
+            ->line(__('Thank you for joining us!'));
     }
 
     /**
