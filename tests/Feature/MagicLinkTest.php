@@ -6,7 +6,9 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
 use Modules\Auth\Models\MagicLinkToken;
+use Modules\Auth\Notifications\LoginNotification;
 use Modules\Auth\Notifications\MagicLinkNotification;
+use Modules\Auth\Settings\AuthSettings;
 use Tests\TestCase;
 
 class MagicLinkTest extends TestCase
@@ -79,6 +81,36 @@ class MagicLinkTest extends TestCase
 
         $this->assertAuthenticated();
         $response->assertRedirect(route('dashboard'));
+    }
+
+    public function test_returning_user_receives_login_notification_after_magic_link_authentication(): void
+    {
+        Notification::fake();
+
+        $settings = app(AuthSettings::class);
+        $settings->login_notification_enabled = true;
+        $settings->save();
+
+        $user = $this->createUser();
+        $plainToken = Str::random(64);
+
+        MagicLinkToken::create([
+            'user_id' => $user->id,
+            'token' => hash('sha256', $plainToken),
+            'expires_at' => now()->addMinutes(15),
+        ]);
+
+        $this->withServerVariables([
+            'REMOTE_ADDR' => '203.0.113.11',
+            'HTTP_USER_AGENT' => 'Magic Browser 1.0',
+        ])->get(route('magic-link.authenticate', $plainToken));
+
+        Notification::assertSentTo(
+            $user,
+            LoginNotification::class,
+            fn (LoginNotification $notification): bool => $notification->ipAddress === '203.0.113.11'
+                && $notification->userAgent === 'Magic Browser 1.0',
+        );
     }
 
     public function test_authentication_fails_with_expired_token(): void
@@ -155,6 +187,49 @@ class MagicLinkTest extends TestCase
         $this->assertDatabaseCount('magic_link_tokens', 1);
     }
 
+    public function test_auth_settings_control_magic_link_expiry(): void
+    {
+        Notification::fake();
+
+        $settings = app(AuthSettings::class);
+        $settings->magic_link_expiry = 30;
+        $settings->save();
+
+        $now = now()->startOfSecond();
+        $this->travelTo($now);
+
+        $user = $this->createUser();
+
+        $this->post(route('magic-link.store'), ['email' => $user->email]);
+
+        $token = MagicLinkToken::whereBelongsTo($user)->sole();
+
+        $this->assertTrue($token->expires_at->equalTo($now->copy()->addMinutes(30)));
+    }
+
+    public function test_magic_link_notification_uses_the_configured_expiry(): void
+    {
+        Notification::fake();
+
+        $settings = app(AuthSettings::class);
+        $settings->magic_link_expiry = 30;
+        $settings->save();
+
+        $user = $this->createUser();
+
+        $this->post(route('magic-link.store'), ['email' => $user->email]);
+
+        Notification::assertSentTo(
+            $user,
+            MagicLinkNotification::class,
+            fn (MagicLinkNotification $notification): bool => in_array(
+                'Click the button below to log in. This link expires in 30 minutes and can only be used once.',
+                $notification->toMail($user)->introLines,
+                true,
+            ),
+        );
+    }
+
     public function test_intended_redirect_is_accepted_for_same_host(): void
     {
         $user = $this->createUser();
@@ -193,9 +268,11 @@ class MagicLinkTest extends TestCase
         $response->assertRedirect(route('dashboard'));
     }
 
-    public function test_magic_link_is_disabled_when_config_is_false(): void
+    public function test_magic_link_is_disabled_by_auth_settings(): void
     {
-        config(['auth.magic_link.enabled' => false]);
+        $settings = app(AuthSettings::class);
+        $settings->magic_link_enabled = false;
+        $settings->save();
 
         $this->get(route('magic-link.create'))->assertStatus(404);
         $this->post(route('magic-link.store'), ['email' => 'test@example.com'])->assertStatus(404);

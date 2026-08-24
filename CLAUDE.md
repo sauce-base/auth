@@ -12,12 +12,21 @@ Authentication, registration, magic link (passwordless), password reset, email v
 | Requests | `LoginRequest` (credential validation + rate limiting), `RegisterRequest` (password hashing in `passedValidation`) |
 | Exceptions | `AuthException` (credentials, throttle), `SocialiteException` (disconnect, account linking, provider validation) |
 | Listeners | `AssignUserRole` (Registered), `UpdateUserLastLogin` (Login), `Impersonation` (TakeImpersonation — session history) |
-| Notifications | `WelcomeNotification` (Registered), `MagicLinkNotification` (passwordless login link, 15-min expiry) |
+| Notifications | `WelcomeNotification` (Registered), `MagicLinkNotification` (passwordless login link with configured expiry) |
+| Settings | `AuthSettings` (`magic_link_enabled`, `magic_link_expiry`) |
 | Trait | `Sociable` — added to User model (socialAccounts relation, connected_providers, disconnect) |
-| Filament | `AuthPlugin`, `UserResource` (list, create, view, edit), `UserForm`, `UsersTable` |
+| Filament | `AuthPlugin`, `AuthenticationSettings`, `UserResource` (list, create, view, edit), `UserForm`, `UsersTable` |
 | Pages | `Login`, `Register`, `ForgotPassword`, `ResetPassword`, `VerifyEmail`, `MagicLink` |
 | Layout | `AuthCardLayout` — card with logo, status alerts, page transitions |
 | Component | `SocialiteProviders` — Google/GitHub buttons with divider |
+
+## Frontend
+
+Follows the dual-framework pattern (see root `CLAUDE.md` → Architecture > Frontend).
+
+- Both `resources/js/vue/` and `resources/js/react/` exist and must stay in sync
+- `resources/js/app.ts` is a generated re-export — do not edit it directly
+- `registerIcon()`, `registerAction()`, `registerGlobalComponent()` calls in `setup()` must be mirrored in both framework implementations
 
 ## Routes
 
@@ -52,9 +61,14 @@ Also prevents account takeover: linking a social ID already owned by another use
 Uses `lab404/laravel-impersonate` + `filament-impersonate`. Session stores history at `impersonation.recent_history` (max 4 user IDs). `ReimpersonateController` lets admins re-impersonate from recent list (max 3 shown in UI, filters deleted users and self). Stop via `filament-impersonate.leave` route.
 
 ### Magic Link Flow
-`MagicLinkController::store()` silently finds the user by email (no error on unknown email). If found: deletes existing tokens for that user, creates a new `MagicLinkToken` (token = SHA-256 hash of `Str::random(64)`, expires in 15 min), and sends `MagicLinkNotification` with the plain-token URL.
+`MagicLinkController::store()` silently finds the user by email (no error on unknown email). If found: deletes existing tokens for that user, creates a new `MagicLinkToken` (token = SHA-256 hash of `Str::random(64)`, expiry controlled by `AuthSettings`), and sends `MagicLinkNotification` with the plain-token URL.
 
 `MagicLinkController::authenticate()` hashes the incoming token, looks it up, calls `isValid()` (not expired + not used), logs in the user, marks the token used, and redirects to intended URL or dashboard.
+
+`AuthSettings` is auto-discovered from `src/Settings`, with defaults installed
+from `database/settings`. Magic links are enabled by default with a 15-minute
+expiry. Administrators manage both values through the `AuthenticationSettings`
+Filament page under the Settings navigation group.
 
 **Token storage:** Plain token only lives in the email link. DB stores `hash('sha256', $plainToken)`. This means even if the DB is compromised, tokens cannot be forged or replayed.
 
@@ -74,7 +88,7 @@ Redirect URIs default to `/auth/socialite/{provider}/callback`. Providers config
 
 ```bash
 php artisan test --testsuite=Modules --filter='^Modules\\Auth\\Tests'  # PHPUnit
-npx playwright test --project="@Auth*"                 # E2E
+npx playwright test --project="@auth*"                 # E2E
 ```
 
 **E2E coverage**: login (basic, errors, security/rate-limiting, social, logout), register (basic, errors), forgot-password (basic, errors), verify-email. Page objects in `tests/e2e/pages/`, fixtures in `tests/e2e/fixtures/users.ts`.

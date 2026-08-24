@@ -18,4 +18,23 @@ return [
     'password' => 'A senha fornecida está incorreta.',
     'throttle' => 'Muitas tentativas de login. Tente novamente em :seconds segundos.',
     'verification-link-sent' => 'Um novo link de verificação foi enviado para seu endereço de email.',
+    'notifications' => [
+        'title' => 'Notificações',
+        'description' => 'Configure as notificações de segurança enviadas aos usuários.',
+        'login-enabled' => 'Enviar notificações de acesso',
+        'login-help' => 'Envie um email aos usuários após um acesso bem-sucedido à conta.',
+    ],
+    'login-notification' => [
+        'subject' => 'Novo acesso à sua conta :app',
+        'greeting' => 'Olá :name,',
+        'notice' => 'Notamos um novo acesso à sua conta :app.',
+        'app' => 'Aplicativo: :app',
+        'time' => 'Horário: :time',
+        'ip-address' => 'Endereço IP: :ip',
+        'device-details' => 'Detalhes do dispositivo: :device',
+        'recognized' => 'Se foi você, nenhuma ação é necessária.',
+        'action' => 'Redefinir sua senha',
+        'unrecognized' => 'Se você não reconhece esta atividade, redefina sua senha imediatamente.',
+        'unknown' => 'Desconhecido',
+    ],
 ];

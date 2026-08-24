@@ -12,24 +12,11 @@ class AuthDatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $adminUser = User::firstOrCreate(
+        $user = User::firstOrCreate(
             ['email' => 'chef@saucebase.dev'],
             [
                 'name' => 'Admin Chef',
                 'password' => bcrypt('secretsauce'),
-            ]
-        );
-
-        // Assign the admin role to the admin user
-        $adminUser->assignRole('admin');
-
-        // Create test users for E2E tests
-        $user = User::firstOrCreate(
-            ['email' => 'test@example.com'],
-            [
-                'name' => 'Test User',
-                'password' => bcrypt('secretsauce'),
-                'email_verified_at' => now(),
             ]
         );
 
