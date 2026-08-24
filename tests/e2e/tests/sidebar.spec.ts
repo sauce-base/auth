@@ -14,13 +14,16 @@ async function skipIfTenancyInstalled(laravel: Parameters<typeof isModuleInstall
 }
 
 test.describe.parallel('Sidebar layout', () => {
-    test('renders tenant switcher in sidebar header', async ({ page, laravel, credentials, loginAs }) => {
+    // The sidebar header is a `sidebar-brand` slot. With no module claiming it, core's own
+    // AppBrand fills it — which is the only thing this module can assert, since the test
+    // is skipped in exactly the configuration where tenancy claims the slot instead.
+    test('renders the application brand in the sidebar header', async ({ page, laravel, credentials, loginAs }) => {
         await skipIfTenancyInstalled(laravel);
         await loginAs(credentials.user);
         await page.goto('/dashboard');
         await expectAuthenticated(page);
 
-        await expect(page.getByTestId('tenant-switcher')).toBeVisible();
+        await expect(page.getByTestId('app-brand')).toBeVisible();
     });
 
     test('user dropdown contains language and theme selectors', async ({ page, laravel, credentials, loginAs }) => {
