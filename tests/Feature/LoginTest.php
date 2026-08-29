@@ -34,6 +34,23 @@ class LoginTest extends TestCase
             );
     }
 
+    public function test_login_page_receives_only_enabled_socialite_providers(): void
+    {
+        $settings = app(AuthSettings::class);
+        $settings->enabled_socialite_providers = ['github', 'unsupported'];
+        $settings->save();
+
+        $this->get(route('login'))
+            ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
+                ->where('auth.socialite_providers', [
+                    [
+                        'name' => 'github',
+                        'label' => 'GitHub',
+                    ],
+                ])
+            );
+    }
+
     public function test_authenticated_user_is_redirected_from_login(): void
     {
         $user = $this->createUser();

@@ -26,8 +26,10 @@ class AuthenticationSettingsPageTest extends TestCase
             ->assertOk();
 
         Livewire::test(AuthenticationSettings::class)
+            ->assertFormFieldExists('enabled_socialite_providers')
             ->assertFormFieldExists('login_notification_enabled')
             ->assertSchemaStateSet([
+                'enabled_socialite_providers' => [],
                 'magic_link_enabled' => true,
                 'magic_link_expiry' => 15,
                 'login_notification_enabled' => false,
@@ -43,6 +45,7 @@ class AuthenticationSettingsPageTest extends TestCase
 
         Livewire::test(AuthenticationSettings::class)
             ->fillForm([
+                'enabled_socialite_providers' => ['google', 'github'],
                 'magic_link_enabled' => false,
                 'magic_link_expiry' => 30,
                 'login_notification_enabled' => true,
@@ -53,9 +56,56 @@ class AuthenticationSettingsPageTest extends TestCase
 
         $settings = new AuthSettings;
 
+        $this->assertSame(['google', 'github'], $settings->enabled_socialite_providers);
         $this->assertFalse($settings->magic_link_enabled);
         $this->assertSame(30, $settings->magic_link_expiry);
         $this->assertTrue($settings->login_notification_enabled);
+    }
+
+    public function test_administrator_can_disable_all_socialite_providers(): void
+    {
+        $admin = User::factory()->create();
+        $admin->assignRole(Role::ADMIN);
+
+        $settings = app(AuthSettings::class);
+        $settings->enabled_socialite_providers = ['google'];
+        $settings->save();
+
+        $this->actingAs($admin);
+
+        Livewire::test(AuthenticationSettings::class)
+            ->fillForm([
+                'enabled_socialite_providers' => [],
+                'magic_link_enabled' => true,
+                'magic_link_expiry' => 15,
+                'login_notification_enabled' => false,
+            ])
+            ->call('save')
+            ->assertHasNoFormErrors()
+            ->assertNotified();
+
+        $this->assertSame([], (new AuthSettings)->enabled_socialite_providers);
+    }
+
+    public function test_unknown_socialite_provider_does_not_change_authentication_settings(): void
+    {
+        $admin = User::factory()->create();
+        $admin->assignRole(Role::ADMIN);
+
+        $this->actingAs($admin);
+
+        Livewire::test(AuthenticationSettings::class)
+            ->fillForm([
+                'enabled_socialite_providers' => ['unsupported'],
+                'magic_link_enabled' => true,
+                'magic_link_expiry' => 15,
+                'login_notification_enabled' => false,
+            ])
+            ->call('save')
+            ->assertHasFormErrors(['enabled_socialite_providers.0'])
+            ->assertNotNotified();
+
+        $this->assertSame([], (new AuthSettings)->enabled_socialite_providers);
     }
 
     #[DataProvider('invalidExpiryProvider')]
