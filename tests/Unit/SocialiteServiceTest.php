@@ -11,6 +11,7 @@ use Laravel\Socialite\Two\User as SocialiteUser;
 use Modules\Auth\Exceptions\SocialiteException;
 use Modules\Auth\Models\SocialAccount;
 use Modules\Auth\Services\SocialiteService;
+use Modules\Auth\Settings\AuthSettings;
 use Tests\TestCase;
 
 class SocialiteServiceTest extends TestCase
@@ -47,12 +48,40 @@ class SocialiteServiceTest extends TestCase
         return $socialiteUser;
     }
 
+    /**
+     * @param  list<string>  $providers
+     */
+    private function enableProviders(array $providers): void
+    {
+        $settings = app(AuthSettings::class);
+        $settings->enabled_socialite_providers = $providers;
+        $settings->save();
+    }
+
+    public function test_enabled_providers_preserve_configuration_order_and_ignore_unknown_names(): void
+    {
+        $this->enableProviders(['github', 'unsupported', 'google']);
+
+        $this->assertSame([
+            [
+                'name' => 'google',
+                'label' => 'Google',
+            ],
+            [
+                'name' => 'github',
+                'label' => 'GitHub',
+            ],
+        ], $this->service->enabledProviders());
+    }
+
     // -----------------------------------------------------------------------
     // linkAccountToUser
     // -----------------------------------------------------------------------
 
     public function test_link_account_creates_social_account(): void
     {
+        $this->enableProviders(['google']);
+
         $user = $this->createUser();
         $socialiteUser = $this->makeSocialiteUser();
 
@@ -67,6 +96,8 @@ class SocialiteServiceTest extends TestCase
 
     public function test_link_account_prevents_takeover_when_provider_id_owned_by_other_user(): void
     {
+        $this->enableProviders(['google']);
+
         $otherUser = User::factory()->create();
         SocialAccount::factory()->create([
             'user_id' => $otherUser->id,
@@ -84,6 +115,8 @@ class SocialiteServiceTest extends TestCase
 
     public function test_link_account_updates_tokens_when_same_user_re_links(): void
     {
+        $this->enableProviders(['google']);
+
         $user = $this->createUser();
         SocialAccount::factory()->create([
             'user_id' => $user->id,
@@ -103,6 +136,19 @@ class SocialiteServiceTest extends TestCase
             'provider_token' => 'new-token',
         ]);
         $this->assertDatabaseCount('social_accounts', 1);
+    }
+
+    public function test_link_account_rejects_disabled_provider(): void
+    {
+        $user = $this->createUser();
+        $socialiteUser = $this->makeSocialiteUser();
+
+        try {
+            $this->service->linkAccountToUser($user, 'google', $socialiteUser);
+            $this->fail('Expected a disabled Socialite provider to be rejected.');
+        } catch (SocialiteException) {
+            $this->assertDatabaseCount('social_accounts', 0);
+        }
     }
 
     // -----------------------------------------------------------------------
@@ -166,6 +212,8 @@ class SocialiteServiceTest extends TestCase
 
     public function test_handle_callback_creates_new_user_when_no_match(): void
     {
+        $this->enableProviders(['google']);
+
         Event::fake([Registered::class]);
 
         $socialiteUser = $this->makeSocialiteUser(
@@ -188,6 +236,8 @@ class SocialiteServiceTest extends TestCase
 
     public function test_handle_callback_returns_existing_user_by_provider_id(): void
     {
+        $this->enableProviders(['google']);
+
         Event::fake([Registered::class]);
 
         $existingUser = User::factory()->create(['email' => 'existing@example.com']);
@@ -218,6 +268,8 @@ class SocialiteServiceTest extends TestCase
 
     public function test_handle_callback_links_new_social_account_to_existing_email_user(): void
     {
+        $this->enableProviders(['google']);
+
         Event::fake([Registered::class]);
 
         $existingUser = User::factory()->create(['email' => 'existing@example.com']);
@@ -249,6 +301,8 @@ class SocialiteServiceTest extends TestCase
 
     public function test_handle_callback_throws_for_invalid_social_user(): void
     {
+        $this->enableProviders(['google']);
+
         $invalidUser = $this->makeSocialiteUser(email: ''); // empty email
 
         Socialite::shouldReceive('driver->user')->andReturn($invalidUser);

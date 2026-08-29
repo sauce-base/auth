@@ -6,26 +6,41 @@ import IconGithub from '~icons/simple-icons/github';
 import IconGoogle from '~icons/simple-icons/google';
 
 type Provider = { name: string; icon: any };
+type AuthProps = {
+    last_social_provider?: string | null;
+    socialite_providers?: Array<{ name: string; label: string }>;
+};
 
-const providers: Provider[] = [
-    { name: 'google', icon: IconGoogle },
-    { name: 'github', icon: IconGithub },
-];
+const providerIcons: Record<string, Provider['icon']> = {
+    google: IconGoogle,
+    github: IconGithub,
+};
 
-const lastUsed = computed(() => usePage().props.auth.last_social_provider);
+const page = usePage();
+const auth = computed(() => (page.props.auth as AuthProps) ?? {});
+const providers = computed(() => auth.value.socialite_providers ?? []);
+const lastUsed = computed(() => auth.value.last_social_provider);
 </script>
 
 <template>
     <div
         v-if="route().has('auth.socialite.redirect') && providers.length"
         class="mb-2 space-y-3"
+        data-testid="socialite-providers"
     >
-        <div v-for="{ name, icon } in providers" :key="name" class="relative">
+        <div v-for="{ name, label } in providers" :key="name" class="relative">
             <Button as-child variant="outline" class="w-full">
-                <a :href="route('auth.socialite.redirect', { provider: name })">
-                    <component :is="icon" class="h-5 w-5" />
+                <a
+                    :href="route('auth.socialite.redirect', { provider: name })"
+                    :data-testid="`socialite-provider-${name}`"
+                >
+                    <component
+                        :is="providerIcons[name]"
+                        v-if="providerIcons[name]"
+                        class="h-5 w-5"
+                    />
                     <span>
-                        {{ $t('Connect with :Provider', { provider: name }) }}
+                        {{ $t('Connect with :Provider', { Provider: label }) }}
                     </span>
                 </a>
             </Button>

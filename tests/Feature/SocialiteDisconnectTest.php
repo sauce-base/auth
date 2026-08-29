@@ -11,7 +11,7 @@ class SocialiteDisconnectTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_user_can_disconnect_a_provider(): void
+    public function test_user_can_disconnect_a_provider_while_socialite_is_disabled(): void
     {
         $user = $this->createUser();
 

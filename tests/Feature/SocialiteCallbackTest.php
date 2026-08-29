@@ -17,6 +17,15 @@ class SocialiteCallbackTest extends TestCase
 {
     use RefreshDatabase;
 
+    private function enableGithub(): AuthSettings
+    {
+        $settings = app(AuthSettings::class);
+        $settings->enabled_socialite_providers = ['github'];
+        $settings->save();
+
+        return $settings;
+    }
+
     private function makeSocialiteUser(
         string $id = 'provider-123',
         string $email = 'socialuser@example.com',
@@ -48,6 +57,8 @@ class SocialiteCallbackTest extends TestCase
 
     public function test_callback_sets_last_social_provider_cookie(): void
     {
+        $this->enableGithub();
+
         $socialiteUser = $this->makeSocialiteUser();
         $this->mockSocialiteDriver($socialiteUser);
 
@@ -61,7 +72,7 @@ class SocialiteCallbackTest extends TestCase
     {
         Notification::fake();
 
-        $settings = app(AuthSettings::class);
+        $settings = $this->enableGithub();
         $settings->login_notification_enabled = true;
         $settings->save();
 
@@ -86,7 +97,7 @@ class SocialiteCallbackTest extends TestCase
     {
         Notification::fake();
 
-        $settings = app(AuthSettings::class);
+        $settings = $this->enableGithub();
         $settings->login_notification_enabled = true;
         $settings->save();
 
@@ -102,6 +113,8 @@ class SocialiteCallbackTest extends TestCase
 
     public function test_callback_does_not_set_cookie_during_account_linking(): void
     {
+        $this->enableGithub();
+
         $user = $this->createUser();
         $socialiteUser = $this->makeSocialiteUser(email: $user->email);
         $this->mockSocialiteDriver($socialiteUser);

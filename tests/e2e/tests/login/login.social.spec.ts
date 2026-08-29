@@ -1,43 +1,60 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from '@e2e/fixtures';
 import { LoginPage } from '../../pages/LoginPage';
 
 test.describe('Login Social Authentication', () => {
-    let loginPage: LoginPage;
+    test.describe.configure({ mode: 'serial' });
 
-    test.beforeEach(async ({ page }) => {
-        loginPage = new LoginPage(page);
+    test('hides social login providers when none are enabled', async ({
+        page,
+        laravel,
+    }) => {
+        await laravel.query('UPDATE settings SET payload = ? WHERE name = ?', [
+            '[]',
+            'enabled_socialite_providers',
+        ]);
+
+        const loginPage = new LoginPage(page);
         await loginPage.goto();
+
+        await expect(page.getByTestId('socialite-providers')).not.toBeVisible();
     });
 
-    test('displays social login providers', async ({ page }) => {
-        const googleButton = page.getByRole('link', {
-            name: /connect with google/i,
-        });
-        const githubButton = page.getByRole('link', {
-            name: /connect with github/i,
-        });
+    test('shows only enabled providers on login and registration', async ({
+        page,
+        laravel,
+    }) => {
+        await laravel.query('UPDATE settings SET payload = ? WHERE name = ?', [
+            '["google"]',
+            'enabled_socialite_providers',
+        ]);
 
-        await expect(googleButton).toBeVisible();
-        await expect(githubButton).toBeVisible();
-    });
+        try {
+            const loginPage = new LoginPage(page);
+            await loginPage.goto();
 
-    test('initiates Google OAuth flow', async ({ page }) => {
-        const googleButton = page.getByRole('link', {
-            name: /connect with google/i,
-        });
-        await expect(googleButton).toBeVisible();
+            const googleButton = page.getByTestId('socialite-provider-google');
+            await expect(googleButton).toBeVisible();
+            await expect(
+                page.getByTestId('socialite-provider-github'),
+            ).not.toBeVisible();
+            await expect(googleButton).toHaveAttribute(
+                'href',
+                /\/auth\/socialite\/google$/,
+            );
 
-        const href = await googleButton.getAttribute('href');
-        expect(href).toContain('/auth/socialite/google');
-    });
+            await page.goto('/auth/register');
 
-    test('initiates GitHub OAuth flow', async ({ page }) => {
-        const githubButton = page.getByRole('link', {
-            name: /connect with github/i,
-        });
-        await expect(githubButton).toBeVisible();
-
-        const href = await githubButton.getAttribute('href');
-        expect(href).toContain('/auth/socialite/github');
+            await expect(
+                page.getByTestId('socialite-provider-google'),
+            ).toBeVisible();
+            await expect(
+                page.getByTestId('socialite-provider-github'),
+            ).not.toBeVisible();
+        } finally {
+            await laravel.query(
+                'UPDATE settings SET payload = ? WHERE name = ?',
+                ['[]', 'enabled_socialite_providers'],
+            );
+        }
     });
 });

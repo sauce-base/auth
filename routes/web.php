@@ -12,6 +12,7 @@ use Modules\Auth\Http\Controllers\ReimpersonateController;
 use Modules\Auth\Http\Controllers\ResetPasswordController;
 use Modules\Auth\Http\Controllers\SocialiteController;
 use Modules\Auth\Http\Controllers\VerifyEmailController;
+use Modules\Auth\Http\Middleware\EnsureSocialiteProviderEnabled;
 
 Route::middleware('web')->group(function (): void {
     Route::prefix('auth')->group(function (): void {
@@ -81,9 +82,11 @@ Route::middleware('web')->group(function (): void {
          * - Authenticated users can use them to connect additional social providers
          */
         Route::get('socialite/{provider}', [SocialiteController::class, 'redirect'])
+            ->middleware(EnsureSocialiteProviderEnabled::class)
             ->name('auth.socialite.redirect');
 
         Route::get('socialite/{provider}/callback', [SocialiteController::class, 'callback'])
+            ->middleware(EnsureSocialiteProviderEnabled::class)
             ->name('auth.socialite.callback');
 
         /**

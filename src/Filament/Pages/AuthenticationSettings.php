@@ -4,11 +4,14 @@ namespace Modules\Auth\Filament\Pages;
 
 use App\Filament\Pages\SettingsPage;
 use BackedEnum;
+use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Validation\Rule;
+use Modules\Auth\Services\SocialiteService;
 use Modules\Auth\Settings\AuthSettings;
 
 class AuthenticationSettings extends SettingsPage
@@ -32,6 +35,25 @@ class AuthenticationSettings extends SettingsPage
     public function form(Schema $schema): Schema
     {
         return $schema->columns(1)->components([
+            Section::make(__('Social Login'))
+                ->description(__('Choose which social providers visitors can use to sign in or create an account.'))
+                ->icon(Heroicon::OutlinedShare)
+                ->schema([
+                    CheckboxList::make('enabled_socialite_providers')
+                        ->label(__('Enabled providers'))
+                        ->extraAttributes(['data-testid' => 'admin-enabled-socialite-providers'])
+                        ->options(fn (): array => collect(SocialiteService::providers())
+                            ->mapWithKeys(fn (array $provider): array => [
+                                $provider['name'] => $provider['label'],
+                            ])
+                            ->all())
+                        ->nestedRecursiveRule(fn (CheckboxList $component) => Rule::in(
+                            array_keys($component->getEnabledOptions()),
+                        ))
+                        ->helperText(__('Provider credentials must also be configured in the deployment environment.'))
+                        ->columns(2)
+                        ->columnSpanFull(),
+                ]),
             Section::make(__('Magic Link Authentication'))
                 ->description(__('Configure passwordless authentication by email.'))
                 ->icon(Heroicon::OutlinedKey)

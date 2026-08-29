@@ -11,22 +11,53 @@ use Laravel\Socialite\Facades\Socialite;
 use Laravel\Socialite\Two\User as SocialiteUser;
 use Modules\Auth\Exceptions\SocialiteException;
 use Modules\Auth\Models\SocialAccount;
+use Modules\Auth\Settings\AuthSettings;
 
 class SocialiteService
 {
+    public function __construct(private readonly AuthSettings $settings) {}
+
     /**
      * Get the list of available social providers.
+     *
+     * @return list<array{name: string, label: string}>
      */
     public static function providers(): array
     {
-        return config('services.socialite_providers', []);
+        return array_values(array_filter(
+            (array) config('services.socialite_providers', []),
+            fn (mixed $provider): bool => is_array($provider)
+                && isset($provider['name'], $provider['label'])
+                && is_string($provider['name'])
+                && is_string($provider['label']),
+        ));
+    }
+
+    /**
+     * Get the configured providers that the administrator has enabled.
+     *
+     * @return list<array{name: string, label: string}>
+     */
+    public function enabledProviders(): array
+    {
+        $enabledProviders = array_flip($this->settings->enabled_socialite_providers);
+
+        return array_values(array_filter(
+            self::providers(),
+            fn (array $provider): bool => array_key_exists($provider['name'], $enabledProviders),
+        ));
+    }
+
+    public function isProviderEnabled(string $provider): bool
+    {
+        return collect($this->enabledProviders())->contains(
+            fn (array $enabledProvider): bool => $enabledProvider['name'] === $provider,
+        );
     }
 
     protected function validateProvider(string $provider): void
     {
-        $availableProviders = array_map(fn ($p) => $p['name'], self::providers());
-
-        if (! in_array($provider, $availableProviders, true)) {
+        if (! $this->isProviderEnabled($provider)) {
             throw SocialiteException::unsupportedProvider($provider);
         }
     }
@@ -84,6 +115,7 @@ class SocialiteService
      */
     public function linkAccountToUser(User $user, string $provider, SocialiteUser $socialiteUser): SocialAccount
     {
+        $this->validateProvider($provider);
         $this->validateSocialUser($socialiteUser);
 
         $avatarUrl = $this->validateAvatarUrl($socialiteUser->getAvatar());
