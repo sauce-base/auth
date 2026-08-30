@@ -55,6 +55,35 @@ class SocialiteCallbackTest extends TestCase
             );
     }
 
+    public function test_social_callback_does_not_create_user_when_registration_is_disabled(): void
+    {
+        $settings = $this->enableGithub();
+        $settings->registration_enabled = false;
+        $settings->save();
+
+        $this->mockSocialiteDriver($this->makeSocialiteUser());
+
+        $response = $this->get(route('auth.socialite.callback', ['provider' => 'github']));
+
+        $response->assertRedirect(route('login'));
+        $this->assertGuest();
+        $this->assertDatabaseMissing('users', ['email' => 'socialuser@example.com']);
+    }
+
+    public function test_social_callback_still_logs_in_existing_user_when_registration_is_disabled(): void
+    {
+        $settings = $this->enableGithub();
+        $settings->registration_enabled = false;
+        $settings->save();
+
+        $user = $this->createUser();
+        $this->mockSocialiteDriver($this->makeSocialiteUser(email: $user->email));
+
+        $this->get(route('auth.socialite.callback', ['provider' => 'github']));
+
+        $this->assertAuthenticatedAs($user);
+    }
+
     public function test_callback_sets_last_social_provider_cookie(): void
     {
         $this->enableGithub();

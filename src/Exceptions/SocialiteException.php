@@ -36,6 +36,11 @@ class SocialiteException extends Exception
         return new self(trans('auth::socialite.account_already_linked', ['provider' => ucfirst($provider)]));
     }
 
+    public static function registrationDisabled(): self
+    {
+        return new self(trans('auth::socialite.registration_disabled'));
+    }
+
     public static function unsupportedProvider(string $provider): self
     {
         return new self(trans('auth::socialite.unsupported_provider', ['provider' => ucfirst($provider)]));

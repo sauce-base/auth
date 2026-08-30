@@ -18,6 +18,12 @@ return [
     'password' => 'A senha fornecida está incorreta.',
     'throttle' => 'Muitas tentativas de login. Tente novamente em :seconds segundos.',
     'verification-link-sent' => 'Um novo link de verificação foi enviado para seu endereço de email.',
+    'registration' => [
+        'title' => 'Cadastro',
+        'description' => 'Controle se visitantes podem criar novas contas.',
+        'enabled' => 'Permitir novos cadastros',
+        'help' => 'Quando desativado, a página de cadastro retorna 404 e o login social não cria novas contas.',
+    ],
     'notifications' => [
         'title' => 'Notificações',
         'description' => 'Configure as notificações de segurança enviadas aos usuários.',

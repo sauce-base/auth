@@ -25,4 +25,5 @@ return [
     'missing_social_accounts_relation' => 'The User model is missing the socialAccounts relationship required for social authentication',
     'account_already_linked' => 'This :provider account is already linked to another user',
     'unsupported_provider' => 'The social provider :provider is not supported',
+    'registration_disabled' => 'New account registration is currently disabled',
 ];

@@ -35,6 +35,16 @@ class AuthenticationSettings extends SettingsPage
     public function form(Schema $schema): Schema
     {
         return $schema->columns(1)->components([
+            Section::make(__('auth::auth.registration.title'))
+                ->description(__('auth::auth.registration.description'))
+                ->icon(Heroicon::OutlinedUserPlus)
+                ->schema([
+                    Toggle::make('registration_enabled')
+                        ->label(__('auth::auth.registration.enabled'))
+                        ->helperText(__('auth::auth.registration.help'))
+                        ->extraAttributes(['data-testid' => 'admin-registration-enabled']),
+                ])
+                ->columns(1),
             Section::make(__('Social Login'))
                 ->description(__('Choose which social providers visitors can use to sign in or create an account.'))
                 ->icon(Heroicon::OutlinedShare)

@@ -12,6 +12,7 @@ use Modules\Auth\Http\Controllers\ReimpersonateController;
 use Modules\Auth\Http\Controllers\ResetPasswordController;
 use Modules\Auth\Http\Controllers\SocialiteController;
 use Modules\Auth\Http\Controllers\VerifyEmailController;
+use Modules\Auth\Http\Middleware\EnsureRegistrationEnabled;
 use Modules\Auth\Http\Middleware\EnsureSocialiteProviderEnabled;
 
 Route::middleware('web')->group(function (): void {
@@ -23,10 +24,12 @@ Route::middleware('web')->group(function (): void {
 
             Route::post('login', [LoginController::class, 'store']);
 
-            Route::get('register', [RegisterController::class, 'create'])
-                ->name('register');
+            Route::middleware(EnsureRegistrationEnabled::class)->group(function (): void {
+                Route::get('register', [RegisterController::class, 'create'])
+                    ->name('register');
 
-            Route::post('register', [RegisterController::class, 'store']);
+                Route::post('register', [RegisterController::class, 'store']);
+            });
 
             Route::get('forgot-password', [ForgotPasswordController::class, 'create'])
                 ->name('password.request');

@@ -10,9 +10,15 @@ import { useState } from 'react';
 import SocialiteProviders from '../components/SocialiteProviders';
 import AuthCardLayout from '../layouts/AuthCardLayout';
 
+type AuthProps = {
+    magic_link_enabled?: boolean;
+    registration_enabled?: boolean;
+};
+
 export default function Login() {
     const t = useT();
     const page = usePage();
+    const auth = (page.props.auth as AuthProps) ?? {};
     const [email, setEmail] = useState('');
     const [showPassword, setShowPassword] = useState(false);
 
@@ -142,7 +148,7 @@ export default function Login() {
                 </Button>
 
                 <p className="mt-2 text-center text-sm">
-                    {(page.props.auth as any)?.magic_link_enabled && (
+                    {auth.magic_link_enabled && (
                         <Link
                             href={route('magic-link.create')}
                             className="text-primary font-medium underline-offset-4 hover:underline"
@@ -153,16 +159,18 @@ export default function Login() {
                     )}
                 </p>
 
-                <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
-                    {t("Don't have an account?")}{' '}
-                    <Link
-                        href={route('register')}
-                        className="text-primary font-medium underline-offset-4 hover:underline"
-                        data-testid="sign-up-link"
-                    >
-                        {t('Sign up')}
-                    </Link>
-                </p>
+                {auth.registration_enabled && (
+                    <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
+                        {t("Don't have an account?")}{' '}
+                        <Link
+                            href={route('register')}
+                            className="text-primary font-medium underline-offset-4 hover:underline"
+                            data-testid="sign-up-link"
+                        >
+                            {t('Sign up')}
+                        </Link>
+                    </p>
+                )}
             </form>
         </AuthCardLayout>
     );

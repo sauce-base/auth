@@ -96,6 +96,10 @@ class SocialiteService
                 ->first();
 
             if (! $user) {
+                if (! $this->settings->registration_enabled) {
+                    throw SocialiteException::registrationDisabled();
+                }
+
                 $user = $this->createNewUser($socialiteUser, $avatarUrl);
             } else {
                 $this->updateUserAvatar($user, $avatarUrl);

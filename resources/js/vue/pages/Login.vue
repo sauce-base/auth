@@ -101,6 +101,7 @@ const forgotUrl = computed(() =>
             </p>
 
             <p
+                v-if="$page.props.auth.registration_enabled"
                 class="mt-2 text-center text-sm text-gray-600 dark:text-gray-400"
             >
                 {{ $t("Don't have an account?") }}
