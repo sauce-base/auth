@@ -26,6 +26,10 @@ class AuthServiceProvider extends ModuleServiceProvider
             fn (): array => $this->app->make(SocialiteService::class)->enabledProviders(),
         );
         Inertia::share(
+            'auth.registration_enabled',
+            fn (): bool => $this->app->make(AuthSettings::class)->registration_enabled,
+        );
+        Inertia::share(
             'auth.magic_link_enabled',
             fn (): bool => $this->app->make(AuthSettings::class)->magic_link_enabled,
         );

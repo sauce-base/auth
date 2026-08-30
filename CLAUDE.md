@@ -10,10 +10,10 @@ Authentication, registration, magic link (passwordless), password reset, email v
 | Models | `SocialAccount` (provider, tokens, avatar, last_login_at), `MagicLinkToken` (hashed token, expires_at, used_at) |
 | Service | `SocialiteService` — all OAuth logic (find/create user, link/disconnect accounts) |
 | Requests | `LoginRequest` (credential validation + rate limiting), `RegisterRequest` (password hashing in `passedValidation`) |
-| Exceptions | `AuthException` (credentials, throttle), `SocialiteException` (disconnect, account linking, provider validation) |
+| Exceptions | `AuthException` (credentials, throttle), `SocialiteException` (disconnect, account linking, provider validation, registration disabled) |
 | Listeners | `AssignUserRole` (Registered), `UpdateUserLastLogin` (Login), `Impersonation` (TakeImpersonation — session history) |
 | Notifications | `WelcomeNotification` (Registered), `MagicLinkNotification` (passwordless login link with configured expiry) |
-| Settings | `AuthSettings` (`magic_link_enabled`, `magic_link_expiry`) |
+| Settings | `AuthSettings` (`registration_enabled`, `magic_link_enabled`, `magic_link_expiry`, `login_notification_enabled`, `enabled_socialite_providers`) |
 | Trait | `Sociable` — added to User model (socialAccounts relation, connected_providers, disconnect) |
 | Filament | `AuthPlugin`, `AuthenticationSettings`, `UserResource` (list, create, view, edit), `UserForm`, `UsersTable` |
 | Pages | `Login`, `Register`, `ForgotPassword`, `ResetPassword`, `VerifyEmail`, `MagicLink` |
@@ -102,3 +102,4 @@ npx playwright test --project="@auth*"                 # E2E
 - Filament UserResource enforces single role (maxItems: 1) despite multi-select UI
 - Magic link authenticate route is outside both guest and auth middleware groups (link is clicked from email client)
 - `MagicLinkToken::isValid()` checks both `expires_at->isFuture()` and `used_at === null`
+- `registration_enabled` closes both signup paths: `EnsureRegistrationEnabled` 404s the register routes, and `SocialiteService::handleCallback()` throws `registrationDisabled()` rather than creating a new user (existing users still sign in). Login is deliberately not toggleable — disabling it would lock out admins.

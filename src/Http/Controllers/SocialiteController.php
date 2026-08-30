@@ -55,7 +55,13 @@ class SocialiteController extends Controller
         }
 
         // Guest user - login/registration flow
-        $user = $this->socialiteService->handleCallback($provider);
+        try {
+            $user = $this->socialiteService->handleCallback($provider);
+        } catch (SocialiteException $e) {
+            Toast::error($e->getMessage());
+
+            return redirect()->route('login');
+        }
 
         Auth::login($user);
 

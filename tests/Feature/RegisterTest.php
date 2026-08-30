@@ -22,6 +22,35 @@ class RegisterTest extends TestCase
         $response->assertStatus(200);
     }
 
+    public function test_register_page_is_not_found_when_registration_is_disabled(): void
+    {
+        $this->disableRegistration();
+
+        $this->get(route('register'))->assertNotFound();
+    }
+
+    public function test_user_cannot_register_when_registration_is_disabled(): void
+    {
+        $this->disableRegistration();
+
+        $this->post(route('register'), [
+            'name' => 'Test User',
+            'email' => 'test@example.com',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+            'terms' => true,
+        ])->assertNotFound();
+
+        $this->assertDatabaseMissing('users', ['email' => 'test@example.com']);
+    }
+
+    private function disableRegistration(): void
+    {
+        $settings = app(AuthSettings::class);
+        $settings->registration_enabled = false;
+        $settings->save();
+    }
+
     public function test_user_can_register_with_valid_data(): void
     {
         Notification::fake();

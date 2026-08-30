@@ -20,6 +20,12 @@ return [
     'verification-link-sent' => 'A fresh verification link has been sent to your email address.',
     'magic-link-sent' => "If an account with that email exists, we've sent a magic login link.",
     'magic-link-expired' => 'This magic link has expired or has already been used.',
+    'registration' => [
+        'title' => 'Registration',
+        'description' => 'Control whether visitors can create new accounts.',
+        'enabled' => 'Allow new registrations',
+        'help' => 'When disabled, the sign-up page returns 404 and social login cannot create new accounts.',
+    ],
     'notifications' => [
         'title' => 'Notifications',
         'description' => 'Configure security notifications sent to users.',

@@ -26,4 +26,5 @@ return [
     'missing_social_accounts_relation' => 'O modelo User está faltando o relacionamento socialAccounts necessário para autenticação social',
     'account_already_linked' => 'Esta conta :provider já está vinculada a outro usuário',
     'unsupported_provider' => 'O provedor social :provider não é suportado',
+    'registration_disabled' => 'O cadastro de novas contas está desativado no momento',
 ];
