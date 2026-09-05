@@ -79,4 +79,51 @@ class PasswordUpdateTest extends TestCase
 
         $response->assertRedirect(route('login'));
     }
+
+    public function test_change_password_page_renders(): void
+    {
+        $user = $this->createUser();
+
+        $this->actingAs($user)
+            ->get(route('settings.profile.password.edit'))
+            ->assertOk();
+    }
+
+    public function test_user_can_update_password_from_the_settings_route(): void
+    {
+        Notification::fake();
+
+        $user = $this->createUser();
+
+        $response = $this->actingAs($user)->put(route('settings.profile.password.update'), [
+            'current_password' => 'password',
+            'password' => 'newpassword123',
+            'password_confirmation' => 'newpassword123',
+        ]);
+
+        $response->assertRedirect(route('settings.profile'));
+        $this->assertTrue(Hash::check('newpassword123', $user->fresh()->getAuthPassword()));
+        Notification::assertSentTo($user, PasswordChangedNotification::class);
+    }
+
+    public function test_settings_route_rejects_a_wrong_current_password(): void
+    {
+        $user = $this->createUser();
+
+        $this->actingAs($user)
+            ->put(route('settings.profile.password.update'), [
+                'current_password' => 'wrong-password',
+                'password' => 'newpassword123',
+                'password_confirmation' => 'newpassword123',
+            ])
+            ->assertInvalid('current_password');
+
+        $this->assertTrue(Hash::check('password', $user->fresh()->getAuthPassword()));
+    }
+
+    public function test_guest_cannot_open_the_change_password_page(): void
+    {
+        $this->get(route('settings.profile.password.edit'))
+            ->assertRedirect(route('login'));
+    }
 }

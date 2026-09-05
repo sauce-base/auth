@@ -5,33 +5,37 @@ namespace Modules\Auth\Http\Controllers;
 use App\Helpers\Toast;
 use App\Notifications\PasswordChangedNotification;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rules\Password;
+use Inertia\Inertia;
+use Inertia\Response;
+use Modules\Auth\Http\Requests\UpdatePasswordRequest;
 
 class PasswordController extends Controller
 {
     /**
+     * Show the password change form.
+     */
+    public function edit(): Response
+    {
+        return Inertia::render('Auth::Profile/ChangePassword');
+    }
+
+    /**
      * Update the user's password.
      */
-    public function update(Request $request): RedirectResponse
+    public function update(UpdatePasswordRequest $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'current_password' => ['required', 'current_password'],
-            'password' => ['required', Password::defaults(), 'confirmed'],
-        ]);
-
         $user = Auth::user();
 
         $user->update([
-            'password' => Hash::make($validated['password']),
+            'password' => Hash::make($request->validated()['password']),
         ]);
 
         $user->notify(new PasswordChangedNotification);
 
         Toast::success('Password changed successfully.');
 
-        return back();
+        return redirect()->route('settings.profile');
     }
 }

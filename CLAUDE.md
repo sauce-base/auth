@@ -6,19 +6,19 @@ Authentication, registration, magic link (passwordless), password reset, email v
 
 | Layer | Files |
 |-------|-------|
-| Controllers | `LoginController`, `RegisterController`, `SocialiteController`, `ForgotPasswordController`, `ResetPasswordController`, `VerifyEmailController`, `EmailVerificationNotificationController`, `EmailVerificationPromptController`, `PasswordController`, `ReimpersonateController`, `MagicLinkController` |
+| Controllers | `LoginController`, `RegisterController`, `SocialiteController`, `ForgotPasswordController`, `ResetPasswordController`, `VerifyEmailController`, `EmailVerificationNotificationController`, `EmailVerificationPromptController`, `PasswordController`, `ProfileController`, `ReimpersonateController`, `MagicLinkController` |
 | Models | `SocialAccount` (provider, tokens, avatar, last_login_at), `MagicLinkToken` (hashed token, expires_at, used_at) |
 | Service | `SocialiteService` — all OAuth logic (find/create user, link/disconnect accounts) |
-| Requests | `LoginRequest` (credential validation + rate limiting), `RegisterRequest` (password hashing in `passedValidation`) |
+| Requests | `LoginRequest` (credential validation + rate limiting), `RegisterRequest` (password hashing in `passedValidation`), `UpdateProfileInfoRequest`, `UpdateProfileAvatarRequest`, `UpdatePasswordRequest` |
 | Exceptions | `AuthException` (credentials, throttle), `SocialiteException` (disconnect, account linking, provider validation, registration disabled) |
 | Listeners | `AssignUserRole` (Registered), `UpdateUserLastLogin` (Login), `Impersonation` (TakeImpersonation — session history) |
 | Notifications | `WelcomeNotification` (Registered), `MagicLinkNotification` (passwordless login link with configured expiry) |
 | Settings | `AuthSettings` (`registration_enabled`, `magic_link_enabled`, `magic_link_expiry`, `login_notification_enabled`, `enabled_socialite_providers`) |
 | Trait | `Sociable` — added to User model (socialAccounts relation, connected_providers, disconnect) |
 | Filament | `AuthPlugin`, `AuthenticationSettings`, `UserResource` (list, create, view, edit), `UserForm`, `UsersTable` |
-| Pages | `Login`, `Register`, `ForgotPassword`, `ResetPassword`, `VerifyEmail`, `MagicLink` |
+| Pages | `Login`, `Register`, `ForgotPassword`, `ResetPassword`, `VerifyEmail`, `MagicLink`, `Profile`, `Profile/Edit`, `Profile/ChangePassword` |
 | Layout | `AuthCardLayout` — card with logo, status alerts, page transitions |
-| Component | `SocialiteProviders` — Google/GitHub buttons with divider |
+| Component | `SocialiteProviders` — Google/GitHub buttons with divider, `PageHeader` — title with optional back link |
 
 ## Frontend
 
@@ -38,6 +38,8 @@ Follows the dual-framework pattern (see root `CLAUDE.md` → Architecture > Fron
 
 **Magic Link** (outside guest/auth groups): `magic-link.authenticate` — `/auth/magic-link/{token}` (GET) — must be accessible from email clients
 
+**Account settings** (`/settings/*`, middleware `auth`, `verified`, `role:admin|user`): `settings.index` (redirect to profile), `settings.profile`, `settings.profile.edit`, `settings.profile.update-info` (PATCH), `settings.profile.update-avatar` (POST), `settings.profile.delete-avatar` (DELETE), `settings.profile.password.edit`, `settings.profile.password.update` (PUT)
+
 **Impersonation**: `/auth/impersonate/{userId}` (POST, auth)
 
 **API**: `/api/v1/auth/me` (GET, auth:sanctum)
@@ -47,7 +49,7 @@ Follows the dual-framework pattern (see root `CLAUDE.md` → Architecture > Fron
 ### Socialite Dual-Flow
 `SocialiteController::callback()` checks `Auth::check()` to branch:
 - **Guest**: finds/creates user via `SocialiteService::handleCallback()`, logs in, redirects to intended URL
-- **Authenticated**: links account via `SocialiteService::linkAccountToUser()`, redirects to `settings.profile`
+- **Authenticated**: links account via `SocialiteService::linkAccountToUser()`, redirects to `settings.profile` (this module owns that route)
 
 ### Disconnect Validation
 Cannot disconnect if it's the user's only login method. `SocialiteService::disconnectProvider()` throws `SocialiteException::cannotDisconnectOnlyMethod()` when `socialAccounts->count() === 1 && !$user->password`.
@@ -72,8 +74,18 @@ Filament page under the Settings navigation group.
 
 **Token storage:** Plain token only lives in the email link. DB stores `hash('sha256', $plainToken)`. This means even if the DB is compromised, tokens cannot be forged or replayed.
 
+### Account Settings Routes Keep the `settings.*` Names
+Profile management moved here from the retired `settings` module. The routes deliberately
+keep the `/settings/*` URLs and `settings.*` names, because app core resolves them by name:
+`NavUser` (Vue + React) guards on `route().has('settings.profile')`, and
+`PasswordChangedNotification` links to `route('settings.profile')`. The settings *shell*
+(`SettingsLayout`, `SettingsSidebar`, `SettingsMobileMenu`) lives in app core, not here.
+
+`PasswordController::update()` is shared by two routes: `password.update` (`PUT /auth/password`)
+and `settings.profile.password.update`. It redirects to `settings.profile` on success.
+
 ### Logout Action Handler
-`app.ts` registers a logout icon and action handler via `registerIcon('logout', ...)` and `registerAction('logout', ...)` from `@/lib/navigation`. The action shows a confirmation dialog and posts to `route('logout')`.
+`app.ts` registers the `logout`, `settings`, and `profile` icons plus the logout action handler via `registerIcon()` and `registerAction()` from `@/lib/navigation`. The action shows a confirmation dialog and posts to `route('logout')`.
 
 ## ENV Variables
 
